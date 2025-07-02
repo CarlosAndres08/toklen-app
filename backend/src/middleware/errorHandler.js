@@ -205,12 +205,5 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
-module.exports = {
-  AppError,
-  globalErrorHandler,
-  notFoundHandler,
-  catchAsync,
-  validateSchema,
-  errorLogger,
-  errorRateLimit
-};
+// Exportar SOLO la función middleware principal
+module.exports = globalErrorHandler;
