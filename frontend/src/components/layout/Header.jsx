@@ -30,11 +30,23 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">Toklen</span>
-            </Link>
+  {/* Nuevo logo con imagen */}
+  <div className="w-8 h-8 rounded-lg overflow-hidden">
+    <img src="/logo.png" alt="Logo Toklen" className="w-full h-full object-cover" />
+  </div>
+
+  {/* Toklen con fuente moderna y color personalizado */}
+  <span
+    className="text-xl font-bold"
+    style={{
+      fontFamily: 'Poppins, sans-serif',
+      color: '#253a48'
+    }}
+  >
+    Toklen
+  </span>
+</Link>
+
           </div>
 
           {/* Navigation - Desktop */}
