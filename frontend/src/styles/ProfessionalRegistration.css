@@ -2,7 +2,7 @@
 
 .professional-registration {
   padding: 2rem;
-  background-color: #f7f7f7;
+  background-color: #ffffff;
   min-height: 100vh;
 }
 
@@ -39,11 +39,11 @@
 }
 
 .step.active .step-number {
-  background-color: #007bff;
+  background-color: #e94567;
 }
 
 .step.completed .step-number {
-  background-color: #28a745;
+  background-color: #10b981;
 }
 
 .form-group {
@@ -65,8 +65,8 @@
 }
 
 .category-option.selected {
-  border-color: #007bff;
-  background-color: #e7f1ff;
+  border-color: #e94567;
+  background-color: #fef2f4;
 }
 
 .skills-list {
@@ -76,7 +76,7 @@
 }
 
 .skill-tag {
-  background-color: #007bff;
+  background-color: #e94567;
   color: white;
   padding: 0.3rem 0.6rem;
   border-radius: 12px;
@@ -99,7 +99,7 @@
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: #e94567;
   color: white;
   padding: 0.6rem 1.2rem;
   border: none;
@@ -108,7 +108,7 @@
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: #273c4a;
   color: white;
   padding: 0.6rem 1.2rem;
   border: none;
@@ -117,11 +117,12 @@
 }
 
 .error-message {
-  color: red;
+  color: #dc2626;
   margin-top: 1rem;
 }
 
 .success-message {
-  color: green;
+  color: #10b981;
   margin-top: 1rem;
 }
+

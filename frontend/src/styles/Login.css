@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #e94567 0%, #273c4a 100%);
   padding: 20px;
   gap: 40px;
 }
@@ -23,33 +23,33 @@
 }
 
 .login-header h1 {
-  color: #3498db;
+  color: #e94567;
   font-size: 2.5rem;
   margin-bottom: 10px;
   font-weight: bold;
 }
 
 .login-header h2 {
-  color: #2c3e50;
+  color: #273c4a;
   font-size: 1.8rem;
   margin-bottom: 5px;
 }
 
 .login-header p {
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 1rem;
 }
 
 .error-message {
-  background: #fee;
-  border: 1px solid #fcc;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #c0392b;
+  color: #dc2626;
 }
 
 .error-icon {
@@ -67,7 +67,7 @@
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #2c3e50;
+  color: #273c4a;
   font-weight: 500;
 }
 
@@ -83,7 +83,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #e94567;
 }
 
 .form-group input:disabled {
@@ -92,7 +92,7 @@
 }
 
 .btn-primary {
-  background: #3498db;
+  background: #e94567;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -104,11 +104,11 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2980b9;
+  background: #d63862;
 }
 
 .btn-primary:disabled {
-  background: #bdc3c7;
+  background: #cbd5e1;
   cursor: not-allowed;
 }
 
@@ -135,17 +135,17 @@
 .divider span {
   background: white;
   padding: 0 20px;
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 0.9rem;
 }
 
 .btn-google {
   width: 100%;
   padding: 12px;
-  border: 2px solid #ecf0f1;
+  border: 2px solid #e2e8f0;
   border-radius: 8px;
   background: white;
-  color: #2c3e50;
+  color: #273c4a;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 500;
@@ -157,12 +157,12 @@
 }
 
 .btn-google:hover:not(:disabled) {
-  border-color: #3498db;
-  background: #f8f9fa;
+  border-color: #e94567;
+  background: #f8fafc;
 }
 
 .btn-google:disabled {
-  background: #f8f9fa;
+  background: #f8fafc;
   cursor: not-allowed;
 }
 
@@ -177,12 +177,12 @@
 }
 
 .login-footer p {
-  color: #7f8c8d;
+  color: #64748b;
   margin-bottom: 10px;
 }
 
 .link {
-  color: #3498db;
+  color: #e94567;
   text-decoration: none;
   font-weight: 500;
   margin-left: 5px;

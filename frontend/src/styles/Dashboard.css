@@ -10,13 +10,13 @@
 }
 
 .dashboard-header h1 {
-  color: #2c3e50;
+  color: #273c4a;
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
 
 .dashboard-header p {
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 1.1rem;
 }
 
@@ -26,8 +26,8 @@
 }
 
 .spinner {
-  border: 4px solid #ecf0f1;
-  border-top: 4px solid #3498db;
+  border: 4px solid #f8fafc;
+  border-top: 4px solid #e94567;
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -64,13 +64,13 @@
 }
 
 .stat-info h3 {
-  color: #2c3e50;
+  color: #273c4a;
   font-size: 1.8rem;
   margin: 0 0 5px 0;
 }
 
 .stat-info p {
-  color: #7f8c8d;
+  color: #64748b;
   margin: 0;
   font-size: 0.9rem;
 }
@@ -97,17 +97,17 @@
   cursor: pointer;
   transition: all 0.3s;
   font-weight: 500;
-  color: #7f8c8d;
+  color: #64748b;
 }
 
 .tab:hover {
-  background: #e9ecef;
+  background: #f8fafc;
 }
 
 .tab.active {
   background: white;
-  color: #3498db;
-  border-bottom: 2px solid #3498db;
+  color: #e94567;
+  border-bottom: 2px solid #e94567;
 }
 
 .tab-content {
@@ -123,7 +123,7 @@
 }
 
 .section-header h2 {
-  color: #2c3e50;
+  color: #273c4a;
   margin: 0;
 }
 
@@ -144,26 +144,26 @@
 }
 
 .service-info h4 {
-  color: #2c3e50;
+  color: #273c4a;
   margin: 0 0 5px 0;
   font-size: 1.2rem;
 }
 
 .service-price {
-  color: #27ae60;
+  color: #e94567;
   font-weight: bold;
   font-size: 1.1rem;
   margin: 0 0 5px 0;
 }
 
 .service-description {
-  color: #7f8c8d;
+  color: #64748b;
   margin: 0 0 10px 0;
   font-size: 0.9rem;
 }
 
 .service-location {
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 0.9rem;
   margin: 0;
 }
@@ -190,26 +190,26 @@
 }
 
 .booking-info h4 {
-  color: #2c3e50;
+  color: #273c4a;
   margin: 0 0 5px 0;
   font-size: 1.2rem;
 }
 
 .booking-date {
-  color: #7f8c8d;
+  color: #64748b;
   margin: 0 0 5px 0;
   font-size: 0.9rem;
 }
 
 .booking-price {
-  color: #27ae60;
+  color: #e94567;
   font-weight: bold;
   font-size: 1.1rem;
   margin: 0 0 5px 0;
 }
 
 .booking-client {
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 0.9rem;
   margin: 0;
 }
@@ -252,7 +252,7 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  border: 3px solid #3498db;
+  border: 3px solid #e94567;
 }
 
 .profile-details {
@@ -260,13 +260,13 @@
 }
 
 .profile-details h3 {
-  color: #2c3e50;
+  color: #273c4a;
   margin: 0 0 5px 0;
   font-size: 1.5rem;
 }
 
 .profile-details p {
-  color: #7f8c8d;
+  color: #64748b;
   margin: 0 0 5px 0;
 }
 
@@ -278,7 +278,7 @@
 
 /* Botones */
 .btn-primary {
-  background: #3498db;
+  background: #e94567;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -289,11 +289,11 @@
 }
 
 .btn-primary:hover {
-  background: #2980b9;
+  background: #d63862;
 }
 
 .btn-secondary {
-  background: #95a5a6;
+  background: #273c4a;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -304,13 +304,13 @@
 }
 
 .btn-secondary:hover {
-  background: #7f8c8d;
+  background: #334155;
 }
 
 .btn-outline {
   background: transparent;
-  color: #3498db;
-  border: 2px solid #3498db;
+  color: #e94567;
+  border: 2px solid #e94567;
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
@@ -319,7 +319,7 @@
 }
 
 .btn-outline:hover {
-  background: #3498db;
+  background: #e94567;
   color: white;
 }
 
@@ -334,28 +334,28 @@
 }
 
 .btn-success {
-  background: #27ae60;
+  background: #10b981;
   color: white;
 }
 
 .btn-success:hover {
-  background: #219a52;
+  background: #059669;
 }
 
 .btn-danger {
-  background: #e74c3c;
+  background: #ef4444;
   color: white;
 }
 
 .btn-danger:hover {
-  background: #c0392b;
+  background: #dc2626;
 }
 
 /* Estado vacío */
 .empty-state {
   text-align: center;
   padding: 40px;
-  color: #7f8c8d;
+  color: #64748b;
 }
 
 .empty-state p {

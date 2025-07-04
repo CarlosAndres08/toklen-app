@@ -10,13 +10,13 @@
 }
 
 .home-header h1 {
-  color: #2c3e50;
+  color: #273c4a;
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
 
 .home-header p {
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 1.2rem;
 }
 
@@ -44,8 +44,8 @@
 }
 
 .service-card.selected {
-  border-color: #3498db;
-  background: #ebf3fd;
+  border-color: #e94567;
+  background: #fef2f4;
 }
 
 .service-icon {
@@ -54,7 +54,7 @@
 }
 
 .service-card h3 {
-  color: #2c3e50;
+  color: #273c4a;
   margin: 0;
   font-size: 1.1rem;
 }
@@ -64,7 +64,7 @@
 }
 
 .search-section h2 {
-  color: #2c3e50;
+  color: #273c4a;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -75,8 +75,8 @@
 }
 
 .spinner {
-  border: 4px solid #ecf0f1;
-  border-top: 4px solid #3498db;
+  border: 4px solid #f8fafc;
+  border-top: 4px solid #e94567;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -106,31 +106,31 @@
 }
 
 .professional-info h4 {
-  color: #2c3e50;
+  color: #273c4a;
   margin: 0 0 5px 0;
   font-size: 1.3rem;
 }
 
 .professional-category {
-  color: #7f8c8d;
+  color: #64748b;
   margin: 0 0 5px 0;
   font-weight: 500;
 }
 
 .professional-price {
-  color: #27ae60;
+  color: #e94567;
   font-weight: bold;
   font-size: 1.1rem;
   margin: 0 0 5px 0;
 }
 
 .professional-rating {
-  color: #f39c12;
+  color: #f59e0b;
   margin: 0 0 5px 0;
 }
 
 .professional-distance {
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 0.9rem;
   margin: 0;
 }
@@ -141,7 +141,7 @@
 }
 
 .btn-primary {
-  background: #3498db;
+  background: #e94567;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -152,11 +152,11 @@
 }
 
 .btn-primary:hover {
-  background: #2980b9;
+  background: #d63862;
 }
 
 .btn-secondary {
-  background: #95a5a6;
+  background: #273c4a;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -167,13 +167,13 @@
 }
 
 .btn-secondary:hover {
-  background: #7f8c8d;
+  background: #334155;
 }
 
 .btn-outline {
   background: transparent;
-  color: #3498db;
-  border: 2px solid #3498db;
+  color: #e94567;
+  border: 2px solid #e94567;
   padding: 12px 24px;
   border-radius: 8px;
   cursor: pointer;
@@ -183,14 +183,14 @@
 }
 
 .btn-outline:hover {
-  background: #3498db;
+  background: #e94567;
   color: white;
 }
 
 .no-professionals {
   text-align: center;
   padding: 40px;
-  color: #7f8c8d;
+  color: #64748b;
 }
 
 .quick-actions {
