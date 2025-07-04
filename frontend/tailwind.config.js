@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        'nunito': ['Nunito', 'sans-serif'],
       },
       colors: {
         primary: {
@@ -34,6 +35,13 @@ export default {
           800: '#1e293b',
           900: '#0f172a',
         },
+        // Nueva paleta de colores solicitada
+        'primary-bg': '#ffffff',
+        'secondary-bg': '#273c4a',
+        'primary-color': '#e94567',
+        'primary-text': '#273c4a',
+        'secondary-text': '#b0bec5',
+        'hover-color': '#ff6e80',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
