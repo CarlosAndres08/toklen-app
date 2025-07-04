@@ -1,1 +1,4 @@
-.vercel
+# Variables de entorno (NUNCA subirlas)
+.env
+.env.production
+

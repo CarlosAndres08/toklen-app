@@ -10,16 +10,14 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 }
 
-// Initialize Firebase
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig)
 
-// Initialize Firebase Auth
+// Inicializar servicios
 export const auth = getAuth(app)
-export const googleProvider = new GoogleAuthProvider()
 
-// Configure Google Provider
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-})
+// Google Auth Provider (centralizado)
+export const googleProvider = new GoogleAuthProvider()
+googleProvider.setCustomParameters({ prompt: 'select_account' })
 
 export default app
