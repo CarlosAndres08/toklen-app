@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toklen - Plataforma de Servicios Profesionales</title>
+  <meta name="description" content="Toklen conecta clientes con profesionales calificados para servicios en el hogar y empresas." />
+  <meta name="keywords" content="servicios profesionales, hogar, empresas, plomería, electricidad, limpieza" />
+  
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://toklen.com/" />
+  <meta property="og:title" content="Toklen - Plataforma de Servicios Profesionales" />
+  <meta property="og:description" content="Conecta con profesionales calificados para servicios en el hogar y empresas." />
+  <meta property="og:image" content="/og-image.jpg" />
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://toklen.com/" />
+  <meta property="twitter:title" content="Toklen - Plataforma de Servicios Profesionales" />
+  <meta property="twitter:description" content="Conecta con profesionales calificados para servicios en el hogar y empresas." />
+  <meta property="twitter:image" content="/twitter-image.jpg" />
+  
+  <!-- Preload critical resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-inter antialiased">
+  <div id="root"></div>
+  
+  <!-- Loading fallback -->
+  <noscript>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Inter, sans-serif;">
+      <div style="text-align: center;">
+        <h1 style="color: #1e3a8a; margin-bottom: 1rem;">Toklen</h1>
+        <p>JavaScript es requerido para ejecutar esta aplicación.</p>
+      </div>
+    </div>
+  </noscript>
+  
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
