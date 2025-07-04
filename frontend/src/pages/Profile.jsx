@@ -1,6 +1,12 @@
+
+
+
+
+
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { authService } from '../services/api'
+import { usersAPI } from '../services/api'
+
 import { 
   User, 
   Mail, 
@@ -37,7 +43,7 @@ const Profile = () => {
   const loadProfile = async () => {
     try {
       setLoading(true)
-      const response = await authService.getProfile()
+      const response = await usersAPI.getProfile()
       setProfile(response.data)
       setEditData({
         displayName: response.data.displayName || '',
@@ -85,7 +91,7 @@ const Profile = () => {
         return
       }
 
-      const response = await authService.updateProfile(editData)
+      const response = await usersAPI.updateProfile(editData)
       setProfile(response.data)
       setIsEditing(false)
       

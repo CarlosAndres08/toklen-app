@@ -71,3 +71,8 @@ export const serviceService = {
 
 // Exporta la instancia en caso de necesitarla directamente
 export default api
+// api.js
+export const usersAPI = authService // ← nuevo alias
+export const professionalsAPI = professionalService
+export const servicesAPI = serviceService
+
