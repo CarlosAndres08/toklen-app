@@ -1,116 +1,154 @@
+/* frontend/src/styles/index.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   * {
-    @apply box-border;
+    @apply box-border m-0 p-0;
   }
+
   html {
     @apply scroll-smooth;
   }
+
   body {
-    /* Usar los colores semánticos definidos en tailwind.config.js */
     @apply bg-base-200 text-info leading-relaxed;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.6;
+    line-height: 1.6; /* Puedes ajustar esto si prefieres usar clases de Tailwind como leading-relaxed */
   }
-  /* Puedes añadir aquí los estilos para #root y .app si los necesitas globalmente */
+
   #root {
     @apply min-h-screen flex flex-col;
   }
-  .app {
+
+  /* Si tienes una clase .app global, puedes definirla aquí también */
+  /* .app {
     @apply flex flex-col min-h-screen;
-  }
-  .main-content {
+  } */
+
+  /* Si tienes una clase .main-content global */
+  /* .main-content {
     @apply flex-1 p-0;
-  }
+  } */
 }
 
 @layer components {
-  .btn {
-    /* Tu definición base de .btn está bien, puedes ajustarla si es necesario */
-    @apply inline-flex items-center justify-center px-6 py-2.5 rounded-lg font-medium text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ease-in-out shadow-sm;
+  /* Contenedor Principal de la App */
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  /* Botones */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-2.5 rounded-lg font-medium text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out shadow-sm;
+    /* Ajusta py-2.5 a py-2 o py-3 según preferencia de altura de botón */
+  }
   .btn-primary {
-    /* Usa 'primary' y 'toklen-coral-hover' que están definidos en tu config */
     @apply btn bg-primary text-white hover:bg-toklen-coral-hover focus:ring-primary;
   }
-
   .btn-secondary {
-    /* Usa 'secondary' y 'toklen-blue-hover' */
     @apply btn bg-secondary text-white hover:bg-toklen-blue-hover focus:ring-secondary;
   }
-  
   .btn-outline-primary {
     @apply btn bg-transparent text-primary border-2 border-primary hover:bg-primary hover:text-white focus:ring-primary;
   }
-
   .btn-outline-secondary {
     @apply btn bg-transparent text-secondary border-2 border-secondary hover:bg-secondary hover:text-white focus:ring-secondary;
   }
-
   .btn-neutral {
      @apply btn bg-neutral/20 text-secondary hover:bg-neutral/30 focus:ring-secondary;
   }
-
   .btn-link {
     @apply btn bg-transparent text-primary hover:text-toklen-coral-hover underline p-0 shadow-none;
   }
-
   .btn-disabled {
     @apply btn opacity-60 cursor-not-allowed;
   }
 
+  /* Tarjetas */
   .card {
-    /* Usar colores base de tu config */
-    @apply bg-base-100 rounded-xl shadow-lg overflow-hidden border border-neutral/20;
+    @apply bg-base-100 rounded-xl shadow-lg overflow-hidden;
+  }
+  .card-bordered {
+    @apply card border border-neutral/20;
+  }
+  .card-compact {
+    @apply card rounded-lg shadow-md;
+  }
+  .card-header {
+    @apply px-6 py-4 border-b border-neutral/20;
+  }
+  .card-body {
+    @apply p-6;
+  }
+  .card-footer {
+    @apply px-6 py-4 border-t border-neutral/20 bg-base-200/50;
   }
 
-  .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-  
-  /* Elimina las clases .form-* si no las usas y prefieres aplicar Tailwind directamente en los JSX */
-  /* Si las mantienes, asegúrate que los colores como #273c4a sean reemplazados por clases como text-secondary */
+  /* Estilos de Formulario (Opcional si prefieres usar Tailwind directamente en JSX) */
+  /* Si decides mantenerlos, asegúrate de que sean consistentes. */
   .form-label {
-    @apply block mb-1 font-medium text-secondary text-sm;
+    @apply block mb-1.5 text-sm font-medium text-secondary;
   }
-  .form-input, .form-textarea, .form-select {
-    @apply w-full px-3 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100 placeholder-neutral/60 text-sm;
+  .form-input,
+  .form-textarea,
+  .form-select {
+    @apply w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100 placeholder-neutral/60 text-sm;
   }
   .form-textarea {
     @apply min-h-[100px] resize-vertical;
   }
-  /* ... etc. para otros estilos de formulario si los mantienes ... */
+  .form-select {
+    @apply bg-no-repeat bg-right;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23B0BEC5' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.75rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  /* Mensajes de Error y Éxito */
+  .error-message {
+    @apply bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md text-sm;
+  }
+  .success-message {
+    @apply bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md text-sm;
+  }
+
+  /* Otros componentes personalizados que puedas necesitar */
 
 }
 
 @layer utilities {
-  /* Estas clases .text-toklen-primary, .bg-toklen-primary etc. son redundantes */
-  /* si ya tienes 'primary' y 'secondary' definidos en tu config. */
-  /* Tailwind ya genera text-primary, bg-primary, text-secondary, bg-secondary. */
+  /* Aquí puedes añadir utilidades personalizadas si realmente las necesitas, */
+  /* pero evita replicar lo que Tailwind ya ofrece o lo que se puede lograr con la configuración. */
   
-  /* Si realmente necesitas los nombres con 'toklen-' directamente, asegúrate que */
-  /* 'toklen-primary' sea un color en tu config, no 'toklen.primary'. */
-  /* Ejemplo: 'toklen-primary': '#e94567', */
-
-  /* Elimina las siguientes secciones porque Tailwind ya maneja los hovers y focus rings */
-  /* si usas las clases correctamente (ej. hover:bg-nombreDelColor, focus:ring-nombreDelColor) */
-  /* y los colores están definidos en tu tailwind.config.js */
-
-  /* === Hover states - Con escape correcto === */
-  /* .hover\:bg-toklen-primary-hover:hover { ... } */ /* ELIMINAR */
-  /* .hover\:bg-toklen-secondary-hover:hover { ... } */ /* ELIMINAR */
-
-  /* === Focus Ring - Clases reconocidas por Tailwind === */
-  /* .focus\:ring-toklen-primary:focus { ... } */ /* ELIMINAR */
-  /* .focus\:ring-toklen-secondary:focus { ... } */ /* ELIMINAR */
-
-  /* === Bordes === */
-  /* .border-toklen-primary { ... } */ /* ELIMINAR (usa border-primary) */
-  /* .border-toklen-secondary { ... } */ /* ELIMINAR (usa border-secondary) */
+  /* Ejemplo: si necesitas una utilidad muy específica */
+  /* .custom-utility {
+    @apply property-value;
+  } */
 }
+
+/* Estilos específicos de componentes que no encajan bien en capas o son muy particulares */
+/* Trata de minimizar el uso de CSS fuera de las capas de Tailwind si es posible */
+
+/* .login-form, .google-login-btn, .divider etc. que tenías en tu index.css original */
+/* Es mejor aplicar estas clases directamente en los componentes JSX usando utilidades de Tailwind */
+/* en lugar de definirlas globalmente aquí, a menos que sean realmente reutilizables */
+/* y complejas de replicar cada vez. */
+
+/* Si decides mantener .login-form, .divider, etc., asegúrate de que usen */
+/* los colores de tu `tailwind.config.js` a través de @apply */
+/* Ejemplo: */
+/* .login-form {
+  @apply max-w-md mx-auto p-8 bg-base-100 rounded-xl shadow-xl;
+} */
+/* .login-form h2 {
+  @apply text-center mb-8 text-secondary text-2xl font-bold;
+} */
