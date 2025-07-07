@@ -40,7 +40,7 @@
 }
 
 @layer utilities {
-  /* === Colores Toklen === */
+  /* === Colores Toklen - Texto === */
   .text-toklen-primary {
     color: #e94567;
   }
@@ -53,6 +53,7 @@
     color: #273c4a;
   }
 
+  /* === Colores Toklen - Fondo === */
   .bg-toklen-primary {
     background-color: #e94567;
   }
@@ -65,27 +66,25 @@
     background-color: #f5f5f5;
   }
 
-  /* Hover states - Clases seguras y sin escape complicado */
-  .bg-toklen-primary-hover,
-  .hover-bg-toklen-primary-hover:hover {
+  /* === Hover states - Con formato correcto === */
+  .hover\:bg-toklen-primary-hover:hover {
     background-color: #d63862; /* Coral más oscuro */
   }
 
-  .bg-toklen-secondary-hover,
-  .hover-bg-toklen-secondary-hover:hover {
+  .hover\:bg-toklen-secondary-hover:hover {
     background-color: #334155; /* Azul más oscuro */
   }
 
-  /* Ring / Focus */
-  .focus-ring-toklen-primary:focus {
+  /* === Focus Ring - Clases reconocidas por Tailwind === */
+  .focus\:ring-toklen-primary:focus {
     @apply ring-2 ring-inset ring-toklen-primary ring-opacity-50;
   }
 
-  .focus-ring-toklen-secondary:focus {
+  .focus\:ring-toklen-secondary:focus {
     @apply ring-2 ring-inset ring-toklen-secondary ring-opacity-50;
   }
 
-  /* Bordes */
+  /* === Bordes === */
   .border-toklen-primary {
     border-color: #e94567;
   }

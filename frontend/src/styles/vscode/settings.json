@@ -1,0 +1,12 @@
+{
+  "tailwindCSS.includeLanguages": {
+    "javascript": "javascript",
+    "javascriptreact": "javascriptreact",
+    "typescript": "typescript",
+    "typescriptreact": "typescriptreact",
+    "vue-html": "html",
+    "vue": "vue"
+  },
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.validateStylesheets": true
+}
