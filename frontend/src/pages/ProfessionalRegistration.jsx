@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { professionalService } from '../services/api'; // <--- AÑADIDA IMPORTACIÓN
 import "../styles/ProfessionalRegistration.css"; // ✅ Ruta correcta
 
 
@@ -159,34 +160,42 @@ const ProfessionalRegistration = () => {
 
     setLoading(true);
     setError('');
+    setSuccess(''); // Limpiar mensaje de éxito anterior
+
+    const professionalData = {
+      ...formData,
+      location: userLocation, // Asegúrate que userLocation tenga lat y lng
+      pricePerHour: parseFloat(formData.pricePerHour) || 0,
+      // El backend esperará el userId del token decodificado, no es necesario enviarlo aquí.
+      // email: currentUser.email // Opcional, el backend puede obtenerlo del token también
+    };
 
     try {
-      const token = await currentUser.getIdToken();
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/professionals/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formData,
-          location: userLocation,
-          pricePerHour: parseFloat(formData.pricePerHour)
-        })
-      });
+      // No es necesario obtener el token manualmente aquí si el interceptor de Axios está configurado
+      // const token = await currentUser.getIdToken(); 
+      // La cabecera de Authorization la pondrá el interceptor de api.js
 
-      if (response.ok) {
+      const response = await professionalService.register(professionalData);
+
+      // Asumiendo que el backend devuelve un objeto con `data` en la respuesta exitosa de Axios
+      if (response.data) { 
         setSuccess('¡Registro exitoso! Tu perfil de profesional ha sido creado.');
         setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
+          navigate('/dashboard'); // O a una página de "perfil de profesional creado"
+        }, 2500);
       } else {
-        const data = await response.json();
-        setError(data.message || 'Error al registrar el profesional');
+        // Esto no debería ocurrir con una respuesta exitosa de Axios que devuelve datos
+        setError(response.message || 'Respuesta inesperada del servidor.');
       }
-    } catch (error) {
-      console.error('Error:', error);
-      setError('Error al conectar con el servidor');
+    } catch (err) {
+      console.error('Error en el registro del profesional:', err);
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Error desconocido al registrar el profesional. Intenta nuevamente.');
+      }
     } finally {
       setLoading(false);
     }

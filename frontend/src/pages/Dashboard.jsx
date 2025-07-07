@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+mport React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { 
@@ -102,102 +102,107 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando dashboard...</p>
+          {/* Reemplazar con componente LoadingSpinner si se prefiere */}
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-neutral">Cargando dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200"> {/* Fondo Gris Claro */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            ¡Hola, {user?.displayName || user?.email?.split('@')[0]}!
+        {/* Header de la página */}
+        <div className="mb-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-secondary">
+            ¡Hola, {user?.displayName?.split(' ')[0] || user?.email?.split('@')[0]}!
           </h1>
-          <p className="mt-2 text-lg text-gray-600">
-            Bienvenido a tu panel de control de Toklen
+          <p className="mt-1 text-lg text-neutral">
+            Bienvenido a tu panel de control de Toklen.
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {/* Card Total Servicios */}
+          <div className="card bg-base-100 shadow-lg p-6 rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Servicios</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalServices}</p>
+                <p className="text-sm font-medium text-neutral">Total Servicios</p>
+                <p className="text-3xl font-bold text-secondary">{stats.totalServices}</p>
               </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-blue-600" />
+              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-primary" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          {/* Card Servicios Activos */}
+          <div className="card bg-base-100 shadow-lg p-6 rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Servicios Activos</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeServices}</p>
+                <p className="text-sm font-medium text-neutral">Servicios Activos</p>
+                <p className="text-3xl font-bold text-secondary">{stats.activeServices}</p>
               </div>
-              <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Clock className="h-6 w-6 text-yellow-600" />
+              <div className="h-12 w-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                <Clock className="h-6 w-6 text-blue-500" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          {/* Card Completados */}
+          <div className="card bg-base-100 shadow-lg p-6 rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Completados</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completedServices}</p>
+                <p className="text-sm font-medium text-neutral">Completados</p>
+                <p className="text-3xl font-bold text-secondary">{stats.completedServices}</p>
               </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-green-500" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          {/* Card Ganancias */}
+          <div className="card bg-base-100 shadow-lg p-6 rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Ganancias</p>
-                <p className="text-2xl font-bold text-gray-900">S/. {stats.totalEarnings}</p>
+                <p className="text-sm font-medium text-neutral">Ganancias Estimadas</p>
+                <p className="text-3xl font-bold text-secondary">S/. {stats.totalEarnings.toFixed(2)}</p>
               </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-green-500" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+        <div className="mb-10">
+          <h2 className="text-xl font-semibold text-secondary mb-4">Acciones Rápidas</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
-              onClick={() => navigate('/request-service')}
-              className="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+              onClick={() => navigate('/request-service')} // Asumiendo esta ruta existe
+              className="btn btn-primary p-4 text-base flex items-center justify-center space-x-2"
             >
               <Plus className="h-5 w-5" />
-              <span>Solicitar Servicio</span>
+              <span>Solicitar Nuevo Servicio</span>
             </button>
             
             <button
               onClick={() => navigate('/search-professionals')}
-              className="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+              className="btn btn-secondary p-4 text-base flex items-center justify-center space-x-2"
             >
               <Search className="h-5 w-5" />
               <span>Buscar Profesionales</span>
             </button>
             
             <button
-              onClick={() => navigate('/become-professional')}
-              className="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+              onClick={() => navigate('/become-professional')} // Asumiendo esta ruta existe
+              className="btn btn-outline-primary p-4 text-base flex items-center justify-center space-x-2" // Cambiado a outline
             >
               <User className="h-5 w-5" />
               <span>Ser Profesional</span>
@@ -206,14 +211,14 @@ const Dashboard = () => {
         </div>
 
         {/* Services Section */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Mis Servicios</h2>
+        <div className="card bg-base-100 shadow-lg rounded-xl overflow-hidden">
+          <div className="p-6 border-b border-neutral/20">
+            <h2 className="text-xl font-semibold text-secondary">Mis Solicitudes de Servicio</h2>
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6" aria-label="Tabs">
+          <div className="border-b border-neutral/20">
+            <nav className="flex space-x-1 sm:space-x-4 px-3 sm:px-6 -mb-px" aria-label="Tabs"> {/* -mb-px para que el borde inferior de la tab activa se una con el borde de la sección */}
               {[
                 { id: 'active', label: 'Activos', count: stats.activeServices },
                 { id: 'completed', label: 'Completados', count: stats.completedServices },
@@ -222,14 +227,15 @@ const Dashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
+                  className={`whitespace-nowrap py-4 px-2 sm:px-4 border-b-2 font-medium text-sm flex items-center space-x-2 focus:outline-none transition-colors duration-150
+                    ${
+                      activeTab === tab.id
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-neutral hover:text-secondary hover:border-neutral/40'
+                    }`}
                 >
                   <span>{tab.label}</span>
-                  <span className="bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">
+                  <span className={`py-0.5 px-2 rounded-full text-xs font-semibold ${activeTab === tab.id ? 'bg-primary/10 text-primary' : 'bg-neutral/10 text-neutral/80'}`}>
                     {tab.count}
                   </span>
                 </button>
@@ -238,24 +244,24 @@ const Dashboard = () => {
           </div>
 
           {/* Services List */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {filteredServices.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="mx-auto h-12 w-12 text-gray-400">
-                  <Calendar className="h-12 w-12" />
+              <div className="text-center py-12">
+                <div className="mx-auto h-16 w-16 text-neutral/40">
+                  <Calendar className="h-full w-full" />
                 </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
-                  No tienes servicios {activeTab === 'active' ? 'activos' : activeTab}
+                <h3 className="mt-4 text-lg font-medium text-secondary">
+                  No tienes servicios {activeTab === 'active' ? 'activos' : (activeTab === 'completed' ? 'completados' : 'cancelados')}
                 </h3>
-                <p className="mt-2 text-gray-500">
-                  {activeTab === 'active' ? 'Solicita un servicio para empezar' : 'Los servicios aparecerán aquí cuando cambien de estado'}
+                <p className="mt-2 text-neutral text-sm">
+                  {activeTab === 'active' ? 'Solicita un servicio para empezar.' : 'Los servicios aparecerán aquí cuando cambien de estado.'}
                 </p>
                 {activeTab === 'active' && (
                   <button
-                    onClick={() => navigate('/request-service')}
-                    className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                    onClick={() => navigate('/request-service')} // Asumiendo ruta
+                    className="btn btn-primary mt-6 text-sm"
                   >
-                    Solicitar Servicio
+                    Solicitar Servicio Ahora
                   </button>
                 )}
               </div>
@@ -264,59 +270,65 @@ const Dashboard = () => {
                 {filteredServices.map((service) => (
                   <div
                     key={service.id}
-                    onClick={() => navigate(`/service/${service.id}`)}
-                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/service/${service.id}`)} // Asumiendo ruta
+                    className="border border-neutral/20 rounded-lg p-4 hover:bg-base-200/30 hover:shadow-md cursor-pointer transition-all duration-150"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row items-start justify-between">
+                      <div className="flex-1 mb-3 sm:mb-0">
                         <div className="flex items-center space-x-2 mb-2">
                           {getStatusIcon(service.status)}
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
                             {getStatusText(service.status)}
                           </span>
                         </div>
                         
-                        <h3 className="text-lg font-medium text-gray-900 mb-1">
-                          {service.title || service.category}
+                        <h3 className="text-lg font-semibold text-secondary hover:text-primary transition-colors mb-1">
+                          {service.title || getCategoryLabel(service.category) || 'Servicio Detallado'}
                         </h3>
                         
-                        <p className="text-gray-600 text-sm mb-2">
-                          {service.description}
+                        <p className="text-neutral text-sm mb-2 line-clamp-2">
+                          {service.description || 'Sin descripción detallada.'}
                         </p>
                         
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral/80">
                           <div className="flex items-center space-x-1">
-                            <MapPin className="h-4 w-4" />
-                            <span>{service.location}</span>
+                            <MapPin className="h-3.5 w-3.5" />
+                            <span>{service.location || 'Ubicación no especificada'}</span>
                           </div>
                           
                           <div className="flex items-center space-x-1">
-                            <Clock className="h-4 w-4" />
+                            <Clock className="h-3.5 w-3.5" />
                             <span>{new Date(service.createdAt).toLocaleDateString()}</span>
                           </div>
                           
                           {service.price && (
                             <div className="flex items-center space-x-1">
-                              <DollarSign className="h-4 w-4" />
-                              <span>S/. {service.price}</span>
+                              <DollarSign className="h-3.5 w-3.5" />
+                              <span className="font-medium">S/. {service.price.toFixed(2)}</span>
                             </div>
                           )}
                         </div>
                       </div>
                       
                       {service.professional && (
-                        <div className="ml-4 text-right">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="ml-0 sm:ml-4 text-left sm:text-right flex-shrink-0">
+                          <p className="text-sm font-semibold text-secondary">
                             {service.professional.name}
                           </p>
                           {service.professional.rating && (
-                            <div className="flex items-center space-x-1 mt-1">
+                            <div className="flex items-center space-x-1 mt-1 justify-start sm:justify-end">
                               <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                              <span className="text-sm text-gray-600">
-                                {service.professional.rating}
+                              <span className="text-xs text-neutral">
+                                {service.professional.rating.toFixed(1)}
                               </span>
                             </div>
                           )}
+                          <Link 
+                            to={`/professional/${service.professional.id}`} // Asumiendo ruta
+                            className="text-xs text-primary hover:underline mt-1 inline-block"
+                          >
+                            Ver Profesional
+                          </Link>
                         </div>
                       )}
                     </div>

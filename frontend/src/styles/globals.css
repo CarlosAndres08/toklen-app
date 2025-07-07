@@ -75,7 +75,7 @@ body {
   }
   .btn-primary {
     @apply btn bg-primary text-white hover:bg-toklen-coral-hover focus:ring-primary;
-    /* Coral */
+    /* Coral - Usando el color 'coral-hover' definido bajo 'toklen' */
   }
   .btn-secondary {
     @apply btn bg-secondary text-white hover:bg-toklen-blue-hover focus:ring-secondary;

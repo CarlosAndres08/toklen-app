@@ -3,6 +3,7 @@
 
 
 
+
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { usersAPI } from '../services/api'
@@ -122,45 +123,45 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-base-200 py-8"> {/* Fondo Gris Claro */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center">
+        {/* Header del Perfil */}
+        <div className="bg-gradient-to-br from-secondary to-toklen-blue-hover rounded-xl shadow-2xl mb-8 overflow-hidden"> {/* Gradiente con colores de la paleta */}
+          <div className="px-6 py-10 md:px-8 md:py-12">
+            <div className="flex flex-col sm:flex-row items-center justify-between">
+              <div className="flex items-center space-x-4 sm:space-x-5">
+                <div className="relative group">
+                  <div className="h-24 w-24 md:h-28 md:w-28 rounded-full bg-base-100/20 flex items-center justify-center ring-4 ring-base-100/30">
                     {user?.photoURL ? (
                       <img 
                         src={user.photoURL} 
-                        alt="Profile" 
-                        className="h-20 w-20 rounded-full object-cover"
+                        alt="Foto de Perfil" 
+                        className="h-full w-full rounded-full object-cover"
                       />
                     ) : (
-                      <User className="h-10 w-10 text-gray-400" />
+                      <User className="h-12 w-12 md:h-14 md:w-14 text-base-100/70" />
                     )}
                   </div>
-                  <button className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 shadow-lg hover:bg-blue-700 transition-colors">
-                    <Camera className="h-4 w-4 text-white" />
+                  <button className="absolute bottom-1 right-1 bg-primary text-white rounded-full p-2 shadow-md hover:bg-toklen-coral-hover transition-colors opacity-0 group-hover:opacity-100 duration-300">
+                    <Camera className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="text-white">
-                  <h1 className="text-2xl font-bold">
-                    {profile?.displayName || 'Usuario'}
+                <div className="text-white mt-3 sm:mt-0 text-center sm:text-left">
+                  <h1 className="text-2xl md:text-3xl font-bold">
+                    {profile?.displayName || 'Nombre de Usuario'}
                   </h1>
-                  <p className="text-blue-100">{profile?.email}</p>
-                  <div className="flex items-center mt-2">
-                    <Shield className="h-4 w-4 mr-1" />
-                    <span className="text-sm">
-                      Miembro desde {new Date(profile?.createdAt).toLocaleDateString()}
+                  <p className="text-toklen-gray-blue/90 text-sm">{profile?.email}</p>
+                  <div className="flex items-center mt-2 text-xs text-toklen-gray-blue/80 justify-center sm:justify-start">
+                    <Shield className="h-3.5 w-3.5 mr-1.5" />
+                    <span>
+                      Miembro desde {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }) : 'N/A'}
                     </span>
                   </div>
                 </div>
               </div>
               <button
                 onClick={handleEditToggle}
-                className="bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition-colors flex items-center space-x-2"
+                className="mt-4 sm:mt-0 btn bg-base-100/20 text-white hover:bg-base-100/30 text-sm py-2 px-5 flex items-center space-x-2"
               >
                 {isEditing ? (
                   <>
@@ -170,7 +171,7 @@ const Profile = () => {
                 ) : (
                   <>
                     <Edit2 className="h-4 w-4" />
-                    <span>Editar</span>
+                    <span>Editar Perfil</span>
                   </>
                 )}
               </button>
@@ -178,135 +179,144 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Error Message */}
+        {/* Mensaje de Error */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="text-red-800 text-sm">{error}</div>
-            </div>
+          <div className="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+            <p className="font-bold">Error</p>
+            <p>{error}</p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Información Personal */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Columna Información Personal */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="card bg-base-100 shadow-xl p-6 md:p-8 rounded-xl"> {/* Usando .card global */}
+              <h2 className="text-xl font-semibold text-secondary mb-6">
                 Información Personal
               </h2>
               
-              <div className="space-y-4">
+              <div className="space-y-5">
+                {/* Campo Nombre */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="displayName" className="block text-sm font-medium text-neutral mb-1">
                     Nombre completo
                   </label>
                   {isEditing ? (
                     <input
+                      id="displayName"
                       type="text"
                       value={editData.displayName}
                       onChange={(e) => handleInputChange('displayName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
                     />
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center space-x-2 text-secondary py-2">
+                      <User className="h-5 w-5 text-neutral/70" />
                       <span>{profile?.displayName || 'No especificado'}</span>
                     </div>
                   )}
                 </div>
 
+                {/* Campo Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-neutral mb-1">
                     Email
                   </label>
                   {isEditing ? (
                     <input
+                      id="email"
                       type="email"
                       value={editData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
                     />
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center space-x-2 text-secondary py-2">
+                      <Mail className="h-5 w-5 text-neutral/70" />
                       <span>{profile?.email}</span>
                     </div>
                   )}
                 </div>
 
+                {/* Campo Teléfono */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="phone" className="block text-sm font-medium text-neutral mb-1">
                     Teléfono
                   </label>
                   {isEditing ? (
                     <input
+                      id="phone"
                       type="tel"
                       value={editData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ingresa tu número de teléfono"
+                      className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
+                      placeholder="Ej: +51 987654321"
                     />
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <Phone className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center space-x-2 text-secondary py-2">
+                      <Phone className="h-5 w-5 text-neutral/70" />
                       <span>{profile?.phone || 'No especificado'}</span>
                     </div>
                   )}
                 </div>
 
+                {/* Campo Dirección */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="address" className="block text-sm font-medium text-neutral mb-1">
                     Dirección
                   </label>
                   {isEditing ? (
                     <input
+                      id="address"
                       type="text"
                       value={editData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ingresa tu dirección"
+                      className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
+                      placeholder="Ej: Av. Siempreviva 742, Lima"
                     />
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center space-x-2 text-secondary py-2">
+                      <MapPin className="h-5 w-5 text-neutral/70" />
                       <span>{profile?.address || 'No especificado'}</span>
                     </div>
                   )}
                 </div>
 
+                {/* Campo Biografía */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Biografía
+                  <label htmlFor="bio" className="block text-sm font-medium text-neutral mb-1">
+                    Sobre mí
                   </label>
                   {isEditing ? (
                     <textarea
+                      id="bio"
                       value={editData.bio}
                       onChange={(e) => handleInputChange('bio', e.target.value)}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Cuéntanos sobre ti..."
+                      className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
+                      placeholder="Una breve descripción sobre ti, tus intereses o lo que buscas en Toklen..."
                     />
                   ) : (
-                    <p className="text-gray-700">
-                      {profile?.bio || 'No has agregado una biografía aún.'}
+                    <p className="text-secondary py-2 whitespace-pre-line">
+                      {profile?.bio || 'Aún no has añadido una biografía.'}
                     </p>
                   )}
                 </div>
               </div>
 
               {isEditing && (
-                <div className="mt-6 flex space-x-3">
+                <div className="mt-8 flex space-x-3">
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
+                    className="btn btn-primary flex items-center space-x-2"
                   >
                     <Save className="h-4 w-4" />
-                    <span>{saving ? 'Guardando...' : 'Guardar cambios'}</span>
+                    <span>{saving ? 'Guardando...' : 'Guardar Cambios'}</span>
                   </button>
                   <button
                     onClick={handleEditToggle}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                    className="btn btn-neutral flex items-center space-x-2" // Usar btn-neutral o btn-outline-secondary
                   >
                     Cancelar
                   </button>
@@ -315,59 +325,63 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Estadísticas y Actividad */}
-          <div className="space-y-6">
-            {/* Estadísticas */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Estadísticas
+          {/* Columna Estadísticas y Actividad */}
+          <div className="space-y-8">
+            {/* Panel de Estadísticas */}
+            <div className="card bg-base-100 shadow-xl p-6 md:p-8 rounded-xl">
+              <h3 className="text-xl font-semibold text-secondary mb-6">
+                Mis Estadísticas
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Servicios solicitados</span>
-                  <span className="font-semibold">{profile?.servicesCount || 0}</span>
+                  <span className="text-sm text-neutral">Servicios solicitados</span>
+                  <span className="font-semibold text-secondary text-lg">{profile?.servicesCount || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Calificación promedio</span>
+                  <span className="text-sm text-neutral">Calificación promedio</span>
                   <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="font-semibold">{profile?.averageRating || 'N/A'}</span>
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <span className="font-semibold text-secondary text-lg">{profile?.averageRating || 'N/A'}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Último servicio</span>
-                  <span className="text-sm">
+                  <span className="text-sm text-neutral">Último servicio</span>
+                  <span className="text-sm text-secondary">
                     {profile?.lastService ? 
-                      new Date(profile.lastService).toLocaleDateString() : 
+                      new Date(profile.lastService).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric'}) : 
                       'Ninguno'
                     }
                   </span>
                 </div>
+                {/* Aquí se podrían añadir más estadísticas relevantes */}
               </div>
             </div>
 
-            {/* Actividad Reciente */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            {/* Panel de Actividad Reciente */}
+            <div className="card bg-base-100 shadow-xl p-6 md:p-8 rounded-xl">
+              <h3 className="text-xl font-semibold text-secondary mb-6">
                 Actividad Reciente
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-5">
                 {profile?.recentActivity?.length > 0 ? (
-                  profile.recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                  profile.recentActivity.slice(0, 3).map((activity, index) => ( // Mostrar solo las 3 más recientes
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className="w-2.5 h-2.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
                       <div>
-                        <p className="text-sm text-gray-700">{activity.description}</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(activity.date).toLocaleDateString()}
+                        <p className="text-sm text-secondary leading-snug">{activity.description}</p>
+                        <p className="text-xs text-neutral mt-0.5">
+                          {new Date(activity.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric'})}
                         </p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">
-                    No hay actividad reciente
+                  <p className="text-sm text-neutral italic">
+                    No hay actividad reciente para mostrar.
                   </p>
+                )}
+                {profile?.recentActivity?.length > 3 && (
+                  <Link to="/activity-log" className="text-sm text-primary hover:underline mt-4 inline-block">Ver toda la actividad</Link>
                 )}
               </div>
             </div>

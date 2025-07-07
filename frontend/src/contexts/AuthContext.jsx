@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {
-  auth,
-  googleProvider
+import { 
+  auth, 
+  googleProvider 
 } from '../services/firebase-config'; // Importaciones de Firebase real
 import {
   onAuthStateChanged,
@@ -43,12 +43,11 @@ const AuthContext = createContext({
   loginWithGoogle: async () => ({ success: false, error: 'Not implemented' }),
   resetPassword: async () => ({ success: false, error: 'Not implemented' }),
   loading: true,
-  error: null,
-  setError: () => {},
+  error: null, // Para almacenar mensajes de error de autenticación
+  setError: () => {}, // Para limpiar errores desde componentes
   isAuthenticated: false,
 });
 
-// Hook personalizado
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -57,19 +56,18 @@ export const useAuth = () => {
   return context;
 };
 
-// Proveedor del contexto
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Estado para errores
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
-      setError(null);
+      setError(null); // Limpiar error en cambio de estado
     });
-    return unsubscribe;
+    return unsubscribe; // Limpieza al desmontar
   }, []);
 
   const login = async (email, password) => {
@@ -77,6 +75,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged se encargará de setCurrentUser
       return { success: true, user: userCredential.user };
     } catch (err) {
       const friendlyError = getFirebaseAuthErrorMessage(err.code);
@@ -93,6 +92,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName });
+      // Actualizar currentUser localmente para reflejar displayName inmediatamente
+      // ya que onAuthStateChanged podría no tenerlo al instante.
       setCurrentUser(prevUser => ({ ...prevUser, ...userCredential.user, displayName }));
       return { success: true, user: { ...userCredential.user, displayName } };
     } catch (err) {
@@ -109,19 +110,22 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       await signOut(auth);
+      // onAuthStateChanged se encargará de setCurrentUser(null)
     } catch (err) {
+      // Generalmente signOut no falla de forma crítica para el usuario
       console.error("Error al cerrar sesión:", err);
-      setError("Error al cerrar sesión.");
+      setError("Error al cerrar sesión."); // Mensaje genérico
     } finally {
       setLoading(false);
     }
   };
-
+  
   const loginWithGoogle = async () => {
     setLoading(true);
     setError(null);
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      // onAuthStateChanged se encargará de setCurrentUser
       return { success: true, user: result.user };
     } catch (err) {
       let friendlyError = getFirebaseAuthErrorMessage(err.code);
@@ -164,7 +168,7 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     loading,
     error,
-    setError
+    setError // Exportar setError para que los componentes puedan limpiarlo si es necesario
   };
 
   return (
@@ -174,5 +178,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Exportación por defecto del contexto
 export default AuthContext;

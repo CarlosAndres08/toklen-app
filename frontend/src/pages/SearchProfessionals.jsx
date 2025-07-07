@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+mport React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { professionalsAPI } from '../services/api'
 import { SERVICE_CATEGORIES, CATEGORY_LABELS, LIMA_DISTRICTS } from '../utils/constants'
@@ -143,30 +143,31 @@ const SearchProfessionals = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200"> {/* Fondo Gris Claro */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        {/* Header de la página */}
+        <div className="mb-8 text-center md:text-left">
+          <h1 className="text-3xl md:text-4xl font-bold text-secondary mb-2">
             Encuentra Profesionales
           </h1>
-          <p className="text-gray-600">
-            Busca y conecta con profesionales calificados en tu área
+          <p className="text-neutral text-lg">
+            Busca y conecta con profesionales calificados en tu área.
           </p>
         </div>
 
         {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="bg-base-100 rounded-xl shadow-lg p-6 mb-8"> {/* Sombra y bordes más pronunciados */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="category" className="block text-sm font-medium text-secondary mb-1">
                 Categoría
               </label>
               <select
+                id="category"
                 name="category"
                 value={filters.category}
                 onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100"
               >
                 <option value="">Todas las categorías</option>
                 {Object.entries(SERVICE_CATEGORIES).map(([key, value]) => (
@@ -178,14 +179,15 @@ const SearchProfessionals = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="district" className="block text-sm font-medium text-secondary mb-1">
                 Distrito
               </label>
               <select
+                id="district"
                 name="district"
                 value={filters.district}
                 onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100"
               >
                 <option value="">Todos los distritos</option>
                 {LIMA_DISTRICTS.map(district => (
@@ -197,8 +199,8 @@ const SearchProfessionals = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Precio por hora
+              <label className="block text-sm font-medium text-secondary mb-1">
+                Precio por hora (S/.)
               </label>
               <div className="flex space-x-2">
                 <input
@@ -207,7 +209,7 @@ const SearchProfessionals = () => {
                   value={filters.minPrice}
                   onChange={handleFilterChange}
                   placeholder="Min"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100"
                 />
                 <input
                   type="number"
@@ -215,22 +217,24 @@ const SearchProfessionals = () => {
                   value={filters.maxPrice}
                   onChange={handleFilterChange}
                   placeholder="Max"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="rating" className="block text-sm font-medium text-secondary mb-1">
                 Calificación mínima
               </label>
               <select
+                id="rating"
                 name="rating"
                 value={filters.rating}
                 onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100"
               >
-                <option value="">Cualquier calificación</option>
+                <option value="">Cualquiera</option>
+                <option value="5">5 estrellas</option>
                 <option value="4">4+ estrellas</option>
                 <option value="3">3+ estrellas</option>
                 <option value="2">2+ estrellas</option>
@@ -238,24 +242,27 @@ const SearchProfessionals = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4 items-center">
-            <button
-              onClick={handleApplyFilters}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Aplicar Filtros
-            </button>
-            <button
-              onClick={handleClearFilters}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Limpiar Filtros
-            </button>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex gap-3">
+              <button
+                onClick={handleApplyFilters}
+                className="btn btn-primary py-2.5 px-6 text-sm" // Usando clases globales
+              >
+                Aplicar Filtros
+              </button>
+              <button
+                onClick={handleClearFilters}
+                className="btn btn-outline-secondary py-2.5 px-6 text-sm" // Usando clases globales
+              >
+                Limpiar Filtros
+              </button>
+            </div>
             
-            <div className="flex ml-auto">
+            <div className="flex self-start sm:self-center">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 rounded-l-md border ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+                title="Vista de Cuadrícula"
+                className={`p-2.5 rounded-l-lg border border-neutral/50 transition-colors duration-150 ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-base-100 text-secondary hover:bg-neutral/10'}`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -263,7 +270,8 @@ const SearchProfessionals = () => {
               </button>
               <button
                 onClick={() => setViewMode('map')}
-                className={`px-3 py-2 rounded-r-md border ${viewMode === 'map' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+                title="Vista de Mapa"
+                className={`p-2.5 rounded-r-lg border border-l-0 border-neutral/50 transition-colors duration-150 ${viewMode === 'map' ? 'bg-primary text-white' : 'bg-base-100 text-secondary hover:bg-neutral/10'}`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -275,68 +283,70 @@ const SearchProfessionals = () => {
 
         {/* Resultados */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            {error}
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6" role="alert">
+            <p className="font-bold">Error</p>
+            <p>{error}</p>
           </div>
         )}
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <LoadingSpinner size="large" />
+            <LoadingSpinner size="large" color="text-primary" />
           </div>
         ) : (
           <>
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {professionals.map((professional) => (
-                  <div key={professional.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                    <div className="p-6">
-                      <div className="flex items-center mb-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold">
-                            {professional.name?.charAt(0) || 'P'}
-                          </span>
+                  // Idealmente, esto sería un componente <ProfessionalCard professional={professional} />
+                  <div key={professional.id} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                    <div className="p-5 flex-grow">
+                      <div className="flex items-start mb-4">
+                        <div className="w-14 h-14 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xl font-bold">
+                          {professional.name?.charAt(0)?.toUpperCase() || 'P'}
                         </div>
-                        <div className="ml-4">
-                          <h3 className="text-lg font-semibold text-gray-900">
+                        <div className="ml-4 flex-1">
+                          <h3 className="text-lg font-semibold text-secondary leading-tight">
                             {professional.name}
                           </h3>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-primary font-medium">
                             {getCategoryLabel(professional.category)}
                           </p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center mb-2">
-                        <div className="flex items-center">
-                          {renderStars(professional.rating || 5)}
+                      <div className="flex items-center mb-3">
+                        <div className="flex items-center text-yellow-400">
+                          {renderStars(professional.rating || 0)}
                         </div>
-                        <span className="ml-2 text-sm text-gray-600">
-                          ({professional.reviewCount || 0} reseñas)
+                        <span className="ml-2 text-xs text-neutral">
+                          ({professional.reviewCount || 0} {professional.reviewCount === 1 ? 'reseña' : 'reseñas'})
                         </span>
                       </div>
                       
-                      <p className="text-gray-600 text-sm mb-3">
-                        {professional.description || 'Profesional experimentado en su área'}
+                      <p className="text-neutral text-sm mb-3 line-clamp-3 min-h-[3.75rem]"> {/* min-h para altura consistente */}
+                        {professional.description || 'Profesional experimentado listo para ayudarte.'}
                       </p>
                       
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="text-lg font-bold text-blue-600">
-                          {formatPrice(professional.pricePerHour || 50)}/hora
+                      <div className="flex justify-between items-center mb-1 text-sm">
+                        <span className="font-semibold text-primary text-lg">
+                          {formatPrice(professional.pricePerHour || 0)}/hr
                         </span>
-                        <span className="text-sm text-gray-500">
-                          {professional.district}
+                        <span className="text-neutral">
+                          {professional.district || 'Lima'}
                         </span>
                       </div>
-                      
-                      <div className="flex space-x-2">
+                    </div>
+                    
+                    <div className="p-5 border-t border-neutral/10 mt-auto"> {/* mt-auto para empujar al fondo */}
+                      <div className="flex space-x-3">
                         <Link
-                          to={`/professional/${professional.id}`}
-                          className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                          to={`/professional/${professional.id}`} // Asumiendo que la ruta es /professional/:id
+                          className="btn btn-primary flex-1 text-sm py-2.5"
                         >
                           Ver Perfil
                         </Link>
-                        <button className="flex-1 border border-blue-600 text-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 transition-colors">
+                        <button className="btn btn-outline-secondary flex-1 text-sm py-2.5">
                           Contactar
                         </button>
                       </div>
@@ -345,29 +355,29 @@ const SearchProfessionals = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm">
+              <div className="bg-base-100 rounded-xl shadow-lg overflow-hidden">
                 <GoogleMap
                   center={mapCenter}
                   zoom={12}
                   markers={mapMarkers}
                   onMarkerClick={handleMarkerClick}
-                  className="w-full h-96"
+                  className="w-full h-[500px] md:h-[600px]" // Altura aumentada
                 />
               </div>
             )}
           </>
         )}
 
-        {!loading && professionals.length === 0 && (
-          <div className="text-center py-12">
-            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        {!loading && professionals.length === 0 && !error && (
+          <div className="text-center py-16">
+            <svg className="w-20 h-20 text-neutral/50 mx-auto mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 10l4.545-4.545M10 10l-4.545 4.545" />
             </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-secondary mb-2">
               No se encontraron profesionales
             </h3>
-            <p className="text-gray-500">
-              Intenta ajustar los filtros de búsqueda
+            <p className="text-neutral">
+              Intenta ajustar los filtros de búsqueda o ampliar tu área.
             </p>
           </div>
         )}
