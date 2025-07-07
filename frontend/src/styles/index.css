@@ -23,7 +23,7 @@
   }
 
   .btn-primary {
-    @apply bg-toklen-primary text-white hover:  bg-toklen-primary-hover focus:ring-toklen-primary;
+    @apply bg-toklen-primary text-white hover:bg-toklen-primary-hover focus:ring-toklen-primary;
   }
 
   .btn-secondary {
