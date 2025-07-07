@@ -8,6 +8,7 @@ const Home = () => {
   return (
     <div className="home-page">
       {/* Hero Section */}
+      
       <section className="hero-section bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">

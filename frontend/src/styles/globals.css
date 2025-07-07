@@ -13,8 +13,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
-  color: #273c4a;
+  @apply bg-base-200 text-info; /* Usando base-200 (Gris Claro) para fondo y info (Azul Oscuro) para texto */
   line-height: 1.6;
 }
 
@@ -63,58 +62,49 @@ body {
 }
 
 /* Botones */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
+/* Se recomienda usar clases de Tailwind directamente para botones por flexibilidad.
+   Sin embargo, si se necesitan clases globales .btn, se pueden definir así: */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.btn-primary {
-  background-color: #e94567;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #d63862;
-}
-
-.btn-secondary {
-  background-color: #273c4a;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #334155;
-}
-
-.btn-outline {
-  background-color: transparent;
-  color: #e94567;
-  border: 2px solid #e94567;
-}
-
-.btn-outline:hover {
-  background-color: #e94567;
-  color: white;
-}
-
-.btn-disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-2.5 rounded-lg font-medium text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out;
+    /* Base styles for all buttons */
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-toklen-coral-hover focus:ring-primary;
+    /* Coral */
+  }
+  .btn-secondary {
+    @apply btn bg-secondary text-white hover:bg-toklen-blue-hover focus:ring-secondary;
+    /* Azul Oscuro */
+  }
+  .btn-outline-primary {
+    @apply btn bg-transparent text-primary border-2 border-primary hover:bg-primary hover:text-white focus:ring-primary;
+  }
+  .btn-outline-secondary {
+    @apply btn bg-transparent text-secondary border-2 border-secondary hover:bg-secondary hover:text-white focus:ring-secondary;
+  }
+  .btn-neutral {
+    @apply btn bg-neutral/20 text-secondary hover:bg-neutral/30 focus:ring-secondary;
+  }
+  .btn-link {
+    @apply btn bg-transparent text-primary hover:text-toklen-coral-hover underline p-0;
+  }
+  .btn-disabled {
+    @apply btn opacity-60 cursor-not-allowed;
+    /* Asegurarse que los colores de fondo/texto no cambien en hover cuando está deshabilitado */
+  }
 }
 
 /* Formularios */
+/* Se recomienda usar clases de Tailwind directamente para formularios.
+   Las clases .form-group, .form-label, etc., pueden ser eliminadas si no se usan globalmente.
+   Si se mantienen, asegurarse que no colisionen o dupliquen estilos de Tailwind aplicados directamente. */
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1rem; /* Tailwind: mb-4 */
 }
 
 .form-label {
@@ -201,30 +191,31 @@ body {
 }
 
 /* Cards */
-.card {
-  background-color: #ffffff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  border: 1px solid #f5f5f5;
-}
-
-.card-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #f5f5f5;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.card-footer {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #f5f5f5;
-  background-color: #f5f5f5;
+/* Similar a los botones, es preferible usar utilidades de Tailwind para las tarjetas.
+   Si se necesita una clase .card genérica: */
+@layer components {
+  .card {
+    @apply bg-base-100 rounded-xl shadow-lg overflow-hidden;
+    /* Sombra más pronunciada y bordes más redondeados */
+  }
+  .card-bordered {
+    @apply card border border-neutral/20;
+  }
+  .card-compact {
+    @apply card rounded-lg shadow-md; /* Menos padding si se define internamente o se usa con p-4 etc. */
+  }
+  /* Las subclases como .card-header, .card-body, .card-footer se pueden definir aquí 
+     o construir con utilidades de Tailwind directamente en los componentes.
+     Ejemplo:
+     .card-body { @apply p-6; }
+     .card-header { @apply px-6 py-4 border-b border-neutral/20; }
+  */
 }
 
 /* Login Form */
+/* Estos estilos son bastante específicos para LoginForm.jsx. 
+   Idealmente, se aplicarían directamente con Tailwind en ese componente.
+   Si se mantienen aquí, asegurarse que usen la paleta de colores de Tailwind. */
 .login-form {
   max-width: 400px;
   margin: 0 auto;

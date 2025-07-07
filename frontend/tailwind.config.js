@@ -11,56 +11,35 @@ export default {
         'nunito': ['Nunito', 'sans-serif'],
       },
       colors: {
-        // Nueva paleta de colores solicitada
-        primary: {
-          50: '#fef2f4',
-          100: '#fce7ea',
-          200: '#f9d2d9',
-          300: '#f4adb8',
-          400: '#ed7f91',
-          500: '#e94567', // Color principal rosa
-          600: '#d63862',
-          700: '#b8294f',
-          800: '#9a1e3d',
-          900: '#7f1a30',
-        },
-        secondary: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#b0bec5', // Gris medio solicitado
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#273c4a', // Gris oscuro solicitado
-          900: '#1e2b37',
-        },
-        gray: {
-          50: '#ffffff',   // Blanco
-          100: '#f5f5f5',  // Gris claro solicitado
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#b0bec5',  // Gris medio solicitado
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#273c4a',  // Gris oscuro solicitado
-          900: '#1e2b37',
-        },
-        // Paleta de colores Toklen actualizada
+        'toklen-blue': '#273C4A', // Azul oscuro
+        'toklen-coral': '#E94567', // Coral
+        'toklen-white': '#FFFFFF', // Blanco
+        'toklen-gray-light': '#F5F5F5', // Gris claro
+        'toklen-gray-blue': '#B0BEC5', // Gris azulado
+        
+        // Asignaciones semánticas para TailwindCSS
+        primary: '#E94567', // Coral como primario
+        secondary: '#273C4A', // Azul oscuro como secundario
+        neutral: '#B0BEC5', // Gris azulado como neutral
+        'base-100': '#FFFFFF', // Blanco para fondo base
+        'base-200': '#F5F5F5', // Gris claro para fondos secundarios
+        info: '#273C4A', // Azul oscuro para texto informativo
+        success: '#16a34a', // Manteniendo un verde para éxito
+        warning: '#facc15', // Manteniendo un amarillo para advertencia
+        error: '#dc2626', // Manteniendo un rojo para error
+
+        // Paleta de colores Toklen (si se prefiere usar con el prefijo 'toklen-')
+        // Esta sección puede ser redundante si se usan los nombres semánticos de arriba
+        // pero se mantiene por si se quiere ser explícito.
         'toklen': {
-          'primary': '#e94567',      // Rosa principal
-          'primary-hover': '#d63862', 
-          'primary-light': '#f4adb8',
-          'secondary': '#273c4a',    // Gris oscuro
-          'secondary-hover': '#334155',
-          'secondary-light': '#475569',
-          'bg': '#ffffff',           // Blanco
-          'bg-secondary': '#f5f5f5', // Gris claro
-          'text': '#273c4a',         // Gris oscuro para texto
-          'text-light': '#64748b',
-          'text-muted': '#b0bec5',   // Gris medio
+          'blue': '#273C4A',
+          'coral': '#E94567',
+          'white': '#FFFFFF',
+          'gray-light': '#F5F5F5',
+          'gray-blue': '#B0BEC5',
+          // Variaciones para hover, focus, etc. (ejemplos)
+          'coral-hover': '#d63862', // Un coral más oscuro para hover
+          'blue-hover': '#334155',   // Un azul más oscuro para hover
         },
       },
       animation: {
@@ -92,4 +71,3 @@ export default {
   },
   plugins: [],
 }
-
