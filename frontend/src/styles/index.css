@@ -40,6 +40,7 @@
 }
 
 @layer utilities {
+  /* === Colores de texto === */
   .text-toklen-primary {
     color: #e94567;
   }
@@ -48,10 +49,15 @@
     color: #273c4a;
   }
   
+  .text-toklen-text {
+    color: #273c4a;
+  }
+
   .text-toklen-text-muted {
     color: #b0bec5;
   }
-  
+
+  /* === Fondo === */
   .bg-toklen-primary {
     background-color: #e94567;
   }
@@ -59,19 +65,21 @@
   .bg-toklen-secondary {
     background-color: #273c4a;
   }
-  
+
   .bg-toklen-bg-secondary {
     background-color: #f5f5f5;
   }
-  
+
+  /* === Hover effects === */
   .hover\:bg-toklen-primary-hover:hover {
-    background-color: #d63862;
+    background-color: #d63862; /* Color más oscuro para efecto hover */
   }
   
   .hover\:bg-toklen-secondary-hover:hover {
     background-color: #334155;
   }
-  
+
+  /* === Bordes === */
   .border-toklen-primary {
     border-color: #e94567;
   }
