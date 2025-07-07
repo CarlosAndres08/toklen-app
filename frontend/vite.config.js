@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
@@ -14,11 +14,11 @@ export default defineConfig({
     }
   },
   define: {
-    'process.env': process.env
+    __APP_ENV__: JSON.stringify(process.env)
   },
   build: {
     outDir: 'dist',
     emptyOutDir: true
   }
-})
+});
 

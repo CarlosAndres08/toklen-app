@@ -1,113 +1,107 @@
-import React, { useState } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
-import { isValidEmail } from '../../utils/helpers'
-import LoadingSpinner from '../common/LoadingSpinner'
+import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { isValidEmail } from '../../utils/helpers';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const LoginForm = ({ onToggleMode }) => {
-  const { login, loginWithGoogle, register, resetPassword, loading, error } = useAuth()
-  const [mode, setMode] = useState('login') // 'login', 'register', 'forgot'
+  const { login, loginWithGoogle, register, resetPassword, loading, error: authError } = useAuth();
+  const [mode, setMode] = useState('login'); // 'login', 'register', 'forgot'
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     displayName: ''
-  })
-  const [localError, setLocalError] = useState('')
-  const [message, setMessage] = useState('')
+  });
+  const [localError, setLocalError] = useState('');
+  const [message, setMessage] = useState('');
 
-  // Manejar cambios en los inputs
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
       [name]: value
-    }))
-    setLocalError('')
-  }
+    }));
+    setLocalError('');
+  };
 
-  // Validar formulario
   const validateForm = () => {
-    const { email, password, confirmPassword, displayName } = formData
+    const { email, password, confirmPassword, displayName } = formData;
 
     if (!email || !isValidEmail(email)) {
-      setLocalError('Ingresa un email válido')
-      return false
+      setLocalError('Ingresa un correo válido');
+      return false;
     }
 
     if (mode === 'login') {
       if (!password) {
-        setLocalError('Ingresa tu contraseña')
-        return false
+        setLocalError('Ingresa tu contraseña');
+        return false;
       }
     } else if (mode === 'register') {
       if (!displayName.trim()) {
-        setLocalError('Ingresa tu nombre completo')
-        return false
+        setLocalError('Ingresa tu nombre completo');
+        return false;
       }
       if (!password || password.length < 6) {
-        setLocalError('La contraseña debe tener al menos 6 caracteres')
-        return false
+        setLocalError('La contraseña debe tener al menos 6 caracteres');
+        return false;
       }
       if (password !== confirmPassword) {
-        setLocalError('Las contraseñas no coinciden')
-        return false
+        setLocalError('Las contraseñas no coinciden');
+        return false;
       }
     }
 
-    return true
-  }
+    return true;
+  };
 
-  // Manejar envío del formulario
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    setLocalError('')
-    setMessage('')
+    setLocalError('');
+    setMessage('');
 
     try {
       if (mode === 'login') {
-        const result = await login(formData.email, formData.password)
+        const result = await login(formData.email, formData.password);
         if (!result.success) {
-          setLocalError(result.error)
+          setLocalError(result.error);
         }
       } else if (mode === 'register') {
-        const result = await register(formData.email, formData.password, formData.displayName)
+        const result = await register(formData.email, formData.password, formData.displayName);
         if (result.success) {
-          setMessage('Registro exitoso. Verifica tu email para continuar.')
-          setMode('login')
+          setMessage('Registro exitoso. Verifica tu email.');
+          setMode('login');
         } else {
-          setLocalError(result.error)
+          setLocalError(result.error);
         }
       } else if (mode === 'forgot') {
-        const result = await resetPassword(formData.email)
+        const result = await resetPassword(formData.email);
         if (result.success) {
-          setMessage('Email de restablecimiento enviado. Revisa tu bandeja de entrada.')
-          setMode('login')
+          setMessage('Email enviado. Revisa tu bandeja.');
+          setMode('login');
         } else {
-          setLocalError(result.error)
+          setLocalError(result.error);
         }
       }
     } catch (error) {
-      setLocalError('Error inesperado. Intenta nuevamente.')
+      setLocalError('Ocurrió un error inesperado. Inténtalo nuevamente.');
     }
-  }
+  };
 
-  // Manejar login con Google
   const handleGoogleLogin = async () => {
-    setLocalError('')
-    const result = await loginWithGoogle()
+    setLocalError('');
+    const result = await loginWithGoogle();
     if (!result.success) {
-      setLocalError(result.error)
+      setLocalError(result.error);
     }
-  }
+  };
 
-  const currentError = localError || error
+  const currentError = localError || authError;
 
   return (
     <div className="max-w-md mx-auto">
-      {/* Contenedor principal del formulario con fondo blanco y sombra */}
       <div className="bg-base-100 rounded-lg shadow-xl p-8">
         <h2 className="text-2xl font-bold text-center mb-6 text-secondary">
           {mode === 'login' && 'Iniciar Sesión'}
@@ -130,9 +124,7 @@ const LoginForm = ({ onToggleMode }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'register' && (
             <div>
-              <label className="block text-sm font-medium text-secondary mb-1">
-                Nombre Completo
-              </label>
+              <label className="block text-sm font-medium text-secondary mb-1">Nombre Completo</label>
               <input
                 type="text"
                 name="displayName"
@@ -146,9 +138,7 @@ const LoginForm = ({ onToggleMode }) => {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-secondary mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-secondary mb-1">Email</label>
             <input
               type="email"
               name="email"
@@ -162,9 +152,7 @@ const LoginForm = ({ onToggleMode }) => {
 
           {mode !== 'forgot' && (
             <div>
-              <label className="block text-sm font-medium text-secondary mb-1">
-                Contraseña
-              </label>
+              <label className="block text-sm font-medium text-secondary mb-1">Contraseña</label>
               <input
                 type="password"
                 name="password"
@@ -179,9 +167,7 @@ const LoginForm = ({ onToggleMode }) => {
 
           {mode === 'register' && (
             <div>
-              <label className="block text-sm font-medium text-secondary mb-1">
-                Confirmar Contraseña
-              </label>
+              <label className="block text-sm font-medium text-secondary mb-1">Confirmar Contraseña</label>
               <input
                 type="password"
                 name="confirmPassword"
@@ -221,7 +207,6 @@ const LoginForm = ({ onToggleMode }) => {
                 <span className="px-2 bg-base-100 text-neutral">O continúa con</span>
               </div>
             </div>
-
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
@@ -231,11 +216,11 @@ const LoginForm = ({ onToggleMode }) => {
                 <LoadingSpinner size="small" color="text-secondary" />
               ) : (
                 <>
-                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24"> {/* Considerar reemplazar con un icono de Google más moderno o un componente de icono si se usa una librería */}
-                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                   </svg>
                   Google
                 </>
@@ -248,17 +233,19 @@ const LoginForm = ({ onToggleMode }) => {
           {mode === 'login' && (
             <>
               <button
+                type="button"
                 onClick={() => setMode('forgot')}
                 className="text-primary hover:text-toklen-coral-hover font-medium mr-4 transition-colors duration-150"
               >
                 ¿Olvidaste tu contraseña?
               </button>
-              <span className="text-neutral">|</span>
+              |
               <button
-                  onClick={() => setMode('register')}
-                  className="text-primary hover:text-toklen-coral-hover font-medium ml-4 transition-colors duration-150"
-                >
-                  Crear cuenta nueva
+                type="button"
+                onClick={() => setMode('register')}
+                className="text-primary hover:text-toklen-coral-hover font-medium ml-4 transition-colors duration-150"
+              >
+                Crear cuenta nueva
               </button>
             </>
           )}
@@ -267,6 +254,7 @@ const LoginForm = ({ onToggleMode }) => {
             <div className="text-neutral">
               ¿Ya tienes cuenta?{' '}
               <button
+                type="button"
                 onClick={() => setMode('login')}
                 className="text-primary hover:text-toklen-coral-hover font-medium transition-colors duration-150"
               >
@@ -279,6 +267,7 @@ const LoginForm = ({ onToggleMode }) => {
             <div className="text-neutral">
               ¿Recordaste tu contraseña?{' '}
               <button
+                type="button"
                 onClick={() => setMode('login')}
                 className="text-primary hover:text-toklen-coral-hover font-medium transition-colors duration-150"
               >
@@ -289,7 +278,7 @@ const LoginForm = ({ onToggleMode }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

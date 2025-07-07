@@ -7,11 +7,11 @@
   * {
     @apply box-border;
   }
-  
+
   html {
     @apply scroll-smooth;
   }
-  
+
   body {
     @apply bg-white text-toklen-text leading-relaxed;
   }
@@ -21,19 +21,19 @@
   .btn {
     @apply inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200;
   }
-  
+
   .btn-primary {
     @apply bg-toklen-primary text-white hover:bg-toklen-primary-hover focus:ring-toklen-primary;
   }
-  
+
   .btn-secondary {
     @apply bg-toklen-secondary text-white hover:bg-toklen-secondary-hover focus:ring-toklen-secondary;
   }
-  
+
   .card {
     @apply bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden;
   }
-  
+
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
@@ -44,11 +44,11 @@
   .text-toklen-primary {
     color: #e94567;
   }
-  
+
   .text-toklen-secondary {
     color: #273c4a;
   }
-  
+
   .text-toklen-text {
     color: #273c4a;
   }
@@ -61,7 +61,7 @@
   .bg-toklen-primary {
     background-color: #e94567;
   }
-  
+
   .bg-toklen-secondary {
     background-color: #273c4a;
   }
@@ -71,10 +71,18 @@
   }
 
   /* === Hover effects === */
-  .hover\:bg-toklen-primary-hover:hover {
-    background-color: #d63862; /* Color más oscuro para efecto hover */
+  .hover-bg-toklen-primary-hover:hover {
+    background-color: #d63862;
   }
-  
+
+  .hover\:bg-toklen-primary-hover:hover {
+    background-color: #d63862;
+  }
+
+  .hover-bg-toklen-secondary-hover:hover {
+    background-color: #334155;
+  }
+
   .hover\:bg-toklen-secondary-hover:hover {
     background-color: #334155;
   }
@@ -83,7 +91,7 @@
   .border-toklen-primary {
     border-color: #e94567;
   }
-  
+
   .border-toklen-secondary {
     border-color: #273c4a;
   }
