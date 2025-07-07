@@ -13,7 +13,7 @@
   }
 
   body {
-    @apply bg-white text-toklen-text leading-relaxed;
+    @apply bg-white text-gray-800 leading-relaxed;
   }
 }
 
@@ -53,10 +53,6 @@
     color: #273c4a;
   }
 
-  .text-toklen-text-muted {
-    color: #b0bec5;
-  }
-
   .bg-toklen-primary {
     background-color: #e94567;
   }
@@ -69,21 +65,23 @@
     background-color: #f5f5f5;
   }
 
-  /* Hover states */
-  .hover\:bg-toklen-primary-hover:hover {
+  /* Hover states - Clases seguras y sin escape complicado */
+  .bg-toklen-primary-hover,
+  .hover-bg-toklen-primary-hover:hover {
     background-color: #d63862; /* Coral más oscuro */
   }
 
-  .hover\:bg-toklen-secondary-hover:hover {
+  .bg-toklen-secondary-hover,
+  .hover-bg-toklen-secondary-hover:hover {
     background-color: #334155; /* Azul más oscuro */
   }
 
   /* Ring / Focus */
-  .focus\:ring-toklen-primary:focus {
+  .focus-ring-toklen-primary:focus {
     @apply ring-2 ring-inset ring-toklen-primary ring-opacity-50;
   }
 
-  .focus\:ring-toklen-secondary:focus {
+  .focus-ring-toklen-secondary:focus {
     @apply ring-2 ring-inset ring-toklen-secondary ring-opacity-50;
   }
 
