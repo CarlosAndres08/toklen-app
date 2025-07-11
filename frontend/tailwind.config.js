@@ -11,35 +11,30 @@ export default {
         'nunito': ['Nunito', 'sans-serif'],
       },
       colors: {
-        'toklen-blue': '#273C4A', // Azul oscuro
-        'toklen-coral': '#E94567', // Coral
-        'toklen-white': '#FFFFFF', // Blanco
-        'toklen-gray-light': '#F5F5F5', // Gris claro
-        'toklen-gray-blue': '#B0BEC5', // Gris azulado
+        'toklen-blue': '#273C4A',
+        'toklen-coral': '#E94567',
+        'toklen-white': '#FFFFFF',
+        'toklen-gray-light': '#F5F5F5',
+        'toklen-gray-blue': '#B0BEC5',
         
-        // Asignaciones semánticas para TailwindCSS
-        primary: '#E94567', // Coral como primario
-        secondary: '#273C4A', // Azul oscuro como secundario
-        neutral: '#B0BEC5', // Gris azulado como neutral
-        'base-100': '#FFFFFF', // Blanco para fondo base
-        'base-200': '#F5F5F5', // Gris claro para fondos secundarios
-        info: '#273C4A', // Azul oscuro para texto informativo
-        success: '#16a34a', // Manteniendo un verde para éxito
-        warning: '#facc15', // Manteniendo un amarillo para advertencia
-        error: '#dc2626', // Manteniendo un rojo para error
+        primary: '#E94567',
+        secondary: '#273C4A',
+        neutral: '#B0BEC5',
+        'base-100': '#FFFFFF',
+        'base-200': '#F5F5F5',
+        info: '#273C4A',
+        success: '#16a34a',
+        warning: '#facc15',
+        error: '#dc2626',
 
-        // Paleta de colores Toklen (si se prefiere usar con el prefijo 'toklen-')
-        // Esta sección puede ser redundante si se usan los nombres semánticos de arriba
-        // pero se mantiene por si se quiere ser explícito.
         'toklen': {
           'blue': '#273C4A',
           'coral': '#E94567',
           'white': '#FFFFFF',
           'gray-light': '#F5F5F5',
           'gray-blue': '#B0BEC5',
-          // Variaciones para hover, focus, etc. (ejemplos)
-          'coral-hover': '#d63862', // Un coral más oscuro para hover
-          'blue-hover': '#334155',   // Un azul más oscuro para hover
+          'coral-hover': '#d63862',
+          'blue-hover': '#334155',
         },
       },
       animation: {
@@ -71,3 +66,4 @@ export default {
   },
   plugins: [],
 }
+

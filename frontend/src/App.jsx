@@ -13,7 +13,7 @@ import ServiceDetails from './pages/ServiceDetails'
 import Profile from './pages/Profile'
 import SearchProfessionals from './pages/SearchProfessionals'
 import ErrorBoundary from './components/common/ErrorBoundary'
-import './styles/globals.css'
+
 
 function App() {
   return (

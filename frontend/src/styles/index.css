@@ -18,34 +18,21 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.6; /* Puedes ajustar esto si prefieres usar clases de Tailwind como leading-relaxed */
+    line-height: 1.6;
   }
 
   #root {
     @apply min-h-screen flex flex-col;
   }
-
-  /* Si tienes una clase .app global, puedes definirla aquí también */
-  /* .app {
-    @apply flex flex-col min-h-screen;
-  } */
-
-  /* Si tienes una clase .main-content global */
-  /* .main-content {
-    @apply flex-1 p-0;
-  } */
 }
 
 @layer components {
-  /* Contenedor Principal de la App */
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Botones */
   .btn {
     @apply inline-flex items-center justify-center px-6 py-2.5 rounded-lg font-medium text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-150 ease-in-out shadow-sm;
-    /* Ajusta py-2.5 a py-2 o py-3 según preferencia de altura de botón */
   }
   .btn-primary {
     @apply btn bg-primary text-white hover:bg-toklen-coral-hover focus:ring-primary;
@@ -59,6 +46,9 @@
   .btn-outline-secondary {
     @apply btn bg-transparent text-secondary border-2 border-secondary hover:bg-secondary hover:text-white focus:ring-secondary;
   }
+  .btn-outline-light { /* Para fondos oscuros */
+    @apply btn bg-transparent text-white border-2 border-white hover:bg-white hover:text-secondary focus:ring-white;
+  }
   .btn-neutral {
      @apply btn bg-neutral/20 text-secondary hover:bg-neutral/30 focus:ring-secondary;
   }
@@ -69,7 +59,6 @@
     @apply btn opacity-60 cursor-not-allowed;
   }
 
-  /* Tarjetas */
   .card {
     @apply bg-base-100 rounded-xl shadow-lg overflow-hidden;
   }
@@ -89,8 +78,6 @@
     @apply px-6 py-4 border-t border-neutral/20 bg-base-200/50;
   }
 
-  /* Estilos de Formulario (Opcional si prefieres usar Tailwind directamente en JSX) */
-  /* Si decides mantenerlos, asegúrate de que sean consistentes. */
   .form-label {
     @apply block mb-1.5 text-sm font-medium text-secondary;
   }
@@ -113,42 +100,28 @@
     -moz-appearance: none;
   }
 
-  /* Mensajes de Error y Éxito */
   .error-message {
     @apply bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md text-sm;
   }
   .success-message {
     @apply bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md text-sm;
   }
-
-  /* Otros componentes personalizados que puedas necesitar */
-
 }
 
 @layer utilities {
-  /* Aquí puedes añadir utilidades personalizadas si realmente las necesitas, */
-  /* pero evita replicar lo que Tailwind ya ofrece o lo que se puede lograr con la configuración. */
-  
-  /* Ejemplo: si necesitas una utilidad muy específica */
-  /* .custom-utility {
-    @apply property-value;
-  } */
+  /* No deberías necesitar definir aquí utilidades de color como .text-toklen-primary */
+  /* o hovers escapados, ya que Tailwind los genera desde tu tailwind.config.js */
+  /* si usas las clases como text-primary, bg-secondary, hover:bg-toklen-coral-hover, etc. */
+}
+/* Archivo: src/index.css (o globals.css) */
+
+/* Estiliza las flechas de navegación de Swiper */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #E94567 !important;
 }
 
-/* Estilos específicos de componentes que no encajan bien en capas o son muy particulares */
-/* Trata de minimizar el uso de CSS fuera de las capas de Tailwind si es posible */
-
-/* .login-form, .google-login-btn, .divider etc. que tenías en tu index.css original */
-/* Es mejor aplicar estas clases directamente en los componentes JSX usando utilidades de Tailwind */
-/* en lugar de definirlas globalmente aquí, a menos que sean realmente reutilizables */
-/* y complejas de replicar cada vez. */
-
-/* Si decides mantener .login-form, .divider, etc., asegúrate de que usen */
-/* los colores de tu `tailwind.config.js` a través de @apply */
-/* Ejemplo: */
-/* .login-form {
-  @apply max-w-md mx-auto p-8 bg-base-100 rounded-xl shadow-xl;
-} */
-/* .login-form h2 {
-  @apply text-center mb-8 text-secondary text-2xl font-bold;
-} */
+/* (Opcional) Paginación activa también coral */
+.swiper-pagination-bullet-active {
+  background-color: #E94567 !important;
+}
