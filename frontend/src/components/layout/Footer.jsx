@@ -9,23 +9,31 @@ const Footer = () => {
     { name: 'Inicio', path: '/' },
     { name: 'Buscar Profesionales', path: '/search-professionals' },
     { name: 'Ser Profesional', path: '/become-professional' },
-    { name: 'Sobre Nosotros', path: '/about' },
-    { name: 'Blog', path: '/blog' },
+    // TODO: Crear página Sobre Nosotros y habilitar enlace
+    // { name: 'Sobre Nosotros', path: '/about' }, 
+    // TODO: Crear página Blog y habilitar enlace
+    // { name: 'Blog', path: '/blog' },
   ];
 
   const categoriesLinks = [
-    { name: 'Plomería', path: '/search/plomeria' },
-    { name: 'Electricidad', path: '/search/electricidad' },
-    { name: 'Limpieza', path: '/search/limpieza' },
-    { name: 'Carpintería', path: '/search/carpinteria' },
-    { name: 'Ver todas', path: '/categories' },
+    // TODO: Implementar búsqueda por categoría específica y habilitar enlaces
+    // { name: 'Plomería', path: '/search/plomeria' },
+    // { name: 'Electricidad', path: '/search/electricidad' },
+    // { name: 'Limpieza', path: '/search/limpieza' },
+    // { name: 'Carpintería', path: '/search/carpinteria' },
+    // TODO: Crear página de todas las categorías y habilitar enlace
+    // { name: 'Ver todas', path: '/categories' },
   ];
   
   const legalLinks = [
-    { name: 'Privacidad', path: '/privacy' },
-    { name: 'Términos de Uso', path: '/terms' },
-    { name: 'Contacto', path: '/contact' },
-    { name: 'Ayuda y FAQ', path: '/help' },
+    // TODO: Crear página de Privacidad y habilitar enlace
+    // { name: 'Privacidad', path: '/privacy' },
+    // TODO: Crear página de Términos de Uso y habilitar enlace
+    // { name: 'Términos de Uso', path: '/terms' },
+    // TODO: Crear página de Contacto y habilitar enlace
+    // { name: 'Contacto', path: '/contact' },
+    // TODO: Crear página de Ayuda y FAQ y habilitar enlace
+    // { name: 'Ayuda y FAQ', path: '/help' },
   ];
 
   // Placeholder para iconos de redes sociales (reemplazar con SVGs reales o librería de iconos)

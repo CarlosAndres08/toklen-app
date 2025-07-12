@@ -11,12 +11,19 @@ const createServiceSchema = Joi.object({
   title: Joi.string().min(5).max(255).required(),
   description: Joi.string().min(10).max(1000).required(),
   category: Joi.string().required(),
-  serviceAddress: Joi.string().required(),
-  serviceLatitude: Joi.number().min(-90).max(90).required(),
-  serviceLongitude: Joi.number().min(-180).max(180).required(),
-  estimatedPrice: Joi.number().min(0).optional(),
-  requestedDate: Joi.date().iso().optional()
-})
+  address: Joi.string().required(), // Corresponde a serviceAddress en la tabla
+  location: Joi.object({ // Contiene lat y lng
+    lat: Joi.number().min(-90).max(90).required(),
+    lng: Joi.number().min(-180).max(180).required()
+  }).required(),
+  budget: Joi.number().min(0).optional().allow(null, ''), // Corresponde a estimatedPrice
+  preferredDate: Joi.date().iso().allow(null, '').optional(),
+  preferredTime: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d)$/).allow(null, '').optional(), // Formato HH:mm
+  urgency: Joi.string().valid('low', 'medium', 'high', 'emergency').optional(),
+  district: Joi.string().optional(),
+  contactPhone: Joi.string().optional(), // TODO: Añadir validación de formato de teléfono
+  additionalNotes: Joi.string().allow(null, '').max(1000).optional()
+});
 
 const updateStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'accepted', 'in_progress', 'completed', 'cancelled').required()
@@ -53,32 +60,67 @@ const createService = async (req, res) => {
       description,
       category,
       serviceAddress,
-      serviceLatitude,
-      serviceLongitude,
-      estimatedPrice,
-      requestedDate
-    } = value
+      title,
+      description,
+      category,
+      address, // del schema Joi
+      location, // del schema Joi {lat, lng}
+      budget, // del schema Joi
+      preferredDate, // del schema Joi
+      preferredTime, // del schema Joi
+      urgency,
+      district,
+      contactPhone,
+      additionalNotes
+    } = value;
+
+    let requestedDatetimeCombined = null;
+    if (preferredDate) {
+      if (preferredTime) {
+        requestedDatetimeCombined = `${preferredDate}T${preferredTime}:00`; // Asume que preferredTime es HH:mm
+      } else {
+        requestedDatetimeCombined = `${preferredDate}T00:00:00`; // Si no hay hora, inicio del día
+      }
+      // Validar si es una fecha válida antes de convertir
+      if (isNaN(new Date(requestedDatetimeCombined).getTime())) {
+        requestedDatetimeCombined = new Date(); // Fallback a ahora si la fecha/hora combinada no es válida
+      } else {
+        requestedDatetimeCombined = new Date(requestedDatetimeCombined);
+      }
+    } else {
+      requestedDatetimeCombined = new Date(); // Default a ahora si no se provee fecha
+    }
+
 
     // Crear servicio
+    // Nombres de columna de la BD: service_address, service_latitude, service_longitude, estimated_price, requested_datetime
+    // Nuevas columnas: urgency, district, contact_phone, additional_notes
     const insertQuery = `
       INSERT INTO services (
-        client_id, title, description, category, service_address,
-        service_latitude, service_longitude, estimated_price, requested_date
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        client_id, title, description, category, 
+        service_address, service_latitude, service_longitude, 
+        estimated_price, requested_datetime,
+        urgency, district, contact_phone, additional_notes,
+        status -- status se establece por DEFAULT 'pending' en la BD
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *
-    `
+    `;
 
     const result = await pool.query(insertQuery, [
       clientId,
       title,
       description,
       category,
-      serviceAddress,
-      serviceLatitude,
-      serviceLongitude,
-      estimatedPrice,
-      requestedDate || new Date()
-    ])
+      address, // Mapeado a service_address
+      location.lat, // Mapeado a service_latitude
+      location.lng, // Mapeado a service_longitude
+      budget, // Mapeado a estimated_price
+      requestedDatetimeCombined, // Mapeado a requested_datetime
+      urgency,
+      district,
+      contactPhone,
+      additionalNotes
+    ]);
 
     res.status(201).json({
       message: 'Servicio creado exitosamente',
@@ -456,18 +498,31 @@ const getServiceById = async (req, res) => {
     const { id: serviceId } = req.params
 
     const serviceQuery = `
-      SELECT s.*, 
-             u.display_name as client_name, u.phone_number as client_phone,
-             pu.display_name as professional_name, pu.phone_number as professional_phone,
-             p.business_name, p.average_rating as professional_rating
+      SELECT 
+        s.id, s.title, s.description, s.category, s.status, 
+        s.urgency, s.district, s.contact_phone, s.additional_notes,
+        s.service_address AS address, 
+        s.service_latitude AS latitude, 
+        s.service_longitude AS longitude,
+        s.estimated_price AS budget, 
+        s.requested_datetime, 
+        s.created_at, s.updated_at, s.accepted_at, s.started_at, s.completed_at,
+        s.client_id, s.professional_id,
+        s.client_rating, s.client_review, s.professional_rating, s.professional_review,
+        uc.display_name AS client_name, 
+        uc.phone_number AS client_contact_phone, -- Renombrado para evitar confusión con service.contact_phone
+        up.display_name AS professional_name, 
+        up.phone_number AS professional_contact_phone, -- Renombrado
+        prof.business_name, 
+        prof.average_rating AS professional_average_rating
       FROM services s
-      JOIN users u ON s.client_id = u.id
-      LEFT JOIN professionals p ON s.professional_id = p.id
-      LEFT JOIN users pu ON p.user_id = pu.id
+      JOIN users uc ON s.client_id = uc.id
+      LEFT JOIN professionals prof ON s.professional_id = prof.id
+      LEFT JOIN users up ON prof.user_id = up.id
       WHERE s.id = $1
-    `
+    `;
 
-    const result = await pool.query(serviceQuery, [serviceId])
+    const result = await pool.query(serviceQuery, [serviceId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Servicio no encontrado' })
@@ -504,5 +559,75 @@ module.exports = {
   updateServiceStatus,
   rateService,
   getServiceById,
-  getNearbyServices
+  getNearbyServices,
+  listPublicServices // Exportar la nueva función
 }
+
+// Nueva función para listar servicios públicos (aprobados)
+exports.listPublicServices = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10; // Límite más bajo para vista pública
+    const offset = (page - 1) * limit;
+    const category = req.query.category;
+    const searchTerm = req.query.search;
+
+    let query = `
+      SELECT s.id, s.title, s.description, s.category, s.service_address as address, 
+             s.estimated_price as budget, s.status, s.created_at,
+             u.display_name as professional_name, p.id as professional_id, p.average_rating as professional_rating
+      FROM services s
+      JOIN professionals p ON s.professional_id = p.id
+      JOIN users u ON p.user_id = u.id
+      WHERE s.status = 'approved'
+    `;
+    let countQuery = `
+      SELECT COUNT(s.id) 
+      FROM services s 
+      JOIN professionals p ON s.professional_id = p.id
+      JOIN users u ON p.user_id = u.id
+      WHERE s.status = 'approved'
+    `;
+    
+    const queryParams = [];
+    const countQueryParams = [];
+    let paramIndex = 1;
+
+    if (category) {
+      query += ` AND s.category = $${paramIndex}`;
+      countQuery += ` AND s.category = $${paramIndex}`;
+      queryParams.push(category);
+      countQueryParams.push(category);
+      paramIndex++;
+    }
+
+    if (searchTerm) {
+      query += ` AND (s.title ILIKE $${paramIndex} OR s.description ILIKE $${paramIndex} OR u.display_name ILIKE $${paramIndex})`;
+      countQuery += ` AND (s.title ILIKE $${paramIndex} OR s.description ILIKE $${paramIndex} OR u.display_name ILIKE $${paramIndex})`;
+      queryParams.push(`%${searchTerm}%`);
+      countQueryParams.push(`%${searchTerm}%`);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY s.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    queryParams.push(limit, offset);
+
+    const servicesResult = await pool.query(query, queryParams);
+    const totalResult = await pool.query(countQuery, countQueryParams);
+
+    res.json({
+      message: 'Servicios públicos listados correctamente.',
+      data: servicesResult.rows,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalResult.rows[0].count / limit),
+        totalServices: parseInt(totalResult.rows[0].count, 10),
+        limit,
+      }
+    });
+
+  } catch (error) {
+    console.error('Error listando servicios públicos:', error);
+    res.status(500).json({ error: 'Error interno del servidor al listar servicios públicos.' });
+  }
+};

@@ -71,7 +71,8 @@ const Header = () => {
           {/* Menú Desktop */}
           <nav className="hidden md:flex items-center space-x-6">
             <NavLinkItem to="/">Inicio</NavLinkItem>
-            <NavLinkItem to="/search-professionals">Buscar</NavLinkItem>
+            <NavLinkItem to="/browse-services">Buscar Servicios</NavLinkItem> {/* Cambiado */}
+            <NavLinkItem to="/search-professionals">Buscar Profesionales</NavLinkItem> {/* Mantener o decidir si se fusiona */}
             <NavLinkItem to="/become-professional">Ser Profesional</NavLinkItem>
           </nav>
 
@@ -123,9 +124,10 @@ const Header = () => {
                     <NavLinkDropdownItem to="/profile" onClick={toggleUserMenu}>
                       Mi Perfil
                     </NavLinkDropdownItem>
-                    <NavLinkDropdownItem to="/my-requests" onClick={toggleUserMenu}>
+                    {/* TODO: Crear página Mis Solicitudes y habilitar enlace */}
+                    {/* <NavLinkDropdownItem to="/my-requests" onClick={toggleUserMenu}>
                       Mis Solicitudes
-                    </NavLinkDropdownItem>
+                    </NavLinkDropdownItem> */}
                     <div className="border-t border-neutral/20 my-1"></div>
                     <button
                       onClick={handleLogout}
@@ -183,8 +185,11 @@ const Header = () => {
               <NavLinkMobileItem to="/" onClick={toggleMobileMenu}>
                 Inicio
               </NavLinkMobileItem>
+              <NavLinkMobileItem to="/browse-services" onClick={toggleMobileMenu}>
+                Buscar Servicios {/* Cambiado */}
+              </NavLinkMobileItem>
               <NavLinkMobileItem to="/search-professionals" onClick={toggleMobileMenu}>
-                Buscar
+                Buscar Profesionales {/* Mantener */}
               </NavLinkMobileItem>
               <NavLinkMobileItem to="/become-professional" onClick={toggleMobileMenu}>
                 Ser Profesional
@@ -226,9 +231,10 @@ const Header = () => {
                   <NavLinkMobileItem to="/profile" onClick={toggleMobileMenu}>
                     Mi Perfil
                   </NavLinkMobileItem>
-                  <NavLinkMobileItem to="/my-requests" onClick={toggleMobileMenu}>
+                  {/* TODO: Crear página Mis Solicitudes y habilitar enlace */}
+                  {/* <NavLinkMobileItem to="/my-requests" onClick={toggleMobileMenu}>
                     Mis Solicitudes
-                  </NavLinkMobileItem>
+                  </NavLinkMobileItem> */}
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-3 py-3 text-base font-medium text-red-600 hover:bg-red-500/10 hover:text-red-700 rounded-md transition-colors duration-150"

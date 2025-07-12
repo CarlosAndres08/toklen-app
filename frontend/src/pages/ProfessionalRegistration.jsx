@@ -123,43 +123,71 @@ const ProfessionalRegistration = () => {
     }));
   };
 
+  const [fieldErrors, setFieldErrors] = useState({});
+
   const validateStep = (step) => {
-    switch (step) {
-      case 1:
-        return formData.name && formData.category && formData.description;
-      case 2:
-        return formData.pricePerHour && formData.phone && formData.address;
-      case 3:
-        return formData.experience && formData.skills.length > 0;
-      default:
-        return true;
+    const errors = {};
+    const { name, category, description, pricePerHour, phone, address, experience, skills, availability } = formData;
+
+    if (step === 1) {
+      if (!name.trim()) errors.name = 'El nombre es obligatorio.';
+      if (!category) errors.category = 'Selecciona una categoría.';
+      if (!description.trim()) errors.description = 'La descripción es obligatoria.';
+      else if (description.trim().length < 20) errors.description = 'La descripción debe tener al menos 20 caracteres.';
+    } else if (step === 2) {
+      if (!pricePerHour) errors.pricePerHour = 'El precio por hora es obligatorio.';
+      else if (isNaN(parseFloat(pricePerHour)) || parseFloat(pricePerHour) <= 0) errors.pricePerHour = 'Ingresa un precio válido.';
+      if (!phone.trim()) errors.phone = 'El teléfono es obligatorio.';
+      // TODO: Añadir validación de formato de teléfono si es necesario
+      if (!address.trim()) errors.address = 'La dirección es obligatoria.';
+      
+      // Validar horarios de disponibilidad
+      for (const day in availability) {
+        if (availability[day].available) {
+          if (availability[day].start && availability[day].end && availability[day].start >= availability[day].end) {
+            errors[`availability_${day}`] = `La hora de fin debe ser posterior a la hora de inicio para ${dayNames[day]}.`;
+          }
+        }
+      }
+    } else if (step === 3) {
+      if (!experience) errors.experience = 'Selecciona tus años de experiencia.';
+      if (skills.length === 0) errors.skills = 'Añade al menos una habilidad.';
     }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => prev + 1);
-      setError('');
+      setError(''); // Limpiar error general
+      setFieldErrors({}); // Limpiar errores de campos
     } else {
-      setError('Por favor completa todos los campos obligatorios');
+      setError('Por favor corrige los errores indicados.'); // Error general si hay errores de campo
     }
   };
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
     setError('');
+    setFieldErrors({});
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateStep(3)) {
-      setError('Por favor completa todos los campos obligatorios');
+    // Validar el último paso antes de enviar
+    if (!validateStep(3)) { 
+      setError('Por favor completa todos los campos obligatorios y corrige los errores.');
+      // Asegurarse de que el usuario vea los errores del paso actual si intenta enviar desde un paso anterior (aunque la UI no lo permite directamente)
+      if (currentStep !== 3) setCurrentStep(3); 
       return;
     }
 
     setLoading(true);
     setError('');
+    setFieldErrors({});
     setSuccess(''); // Limpiar mensaje de éxito anterior
 
     const professionalData = {
@@ -220,6 +248,7 @@ const ProfessionalRegistration = () => {
                 required
                 className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100 placeholder-neutral/60"
               />
+              {fieldErrors.name && <p className="text-xs text-red-500 mt-1">{fieldErrors.name}</p>}
             </div>
 
             <div>
@@ -239,6 +268,7 @@ const ProfessionalRegistration = () => {
                   </div>
                 ))}
               </div>
+              {fieldErrors.category && <p className="text-xs text-red-500 mt-1">{fieldErrors.category}</p>}
             </div>
 
             <div>
@@ -253,6 +283,7 @@ const ProfessionalRegistration = () => {
                 required
                 className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100 placeholder-neutral/60"
               />
+              {fieldErrors.description && <p className="text-xs text-red-500 mt-1">{fieldErrors.description}</p>}
             </div>
           </div>
         );
@@ -277,6 +308,7 @@ const ProfessionalRegistration = () => {
                   required
                   className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100 placeholder-neutral/60"
                 />
+                {fieldErrors.pricePerHour && <p className="text-xs text-red-500 mt-1">{fieldErrors.pricePerHour}</p>}
               </div>
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-secondary mb-1">Teléfono de contacto *</label>
@@ -290,6 +322,7 @@ const ProfessionalRegistration = () => {
                   required
                   className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100 placeholder-neutral/60"
                 />
+                {fieldErrors.phone && <p className="text-xs text-red-500 mt-1">{fieldErrors.phone}</p>}
               </div>
             </div>
 
@@ -306,6 +339,7 @@ const ProfessionalRegistration = () => {
                 className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-150 bg-base-100 placeholder-neutral/60"
               />
                <p className="text-xs text-neutral mt-1">Esta dirección se usará para que los clientes te encuentren por cercanía.</p>
+               {fieldErrors.address && <p className="text-xs text-red-500 mt-1">{fieldErrors.address}</p>}
             </div>
 
             <div>
@@ -341,6 +375,7 @@ const ProfessionalRegistration = () => {
                         />
                       </div>
                     )}
+                    {fieldErrors[`availability_${day}`] && <p className="text-xs text-red-500 mt-1 w-full sm:w-auto sm:ml-2">{fieldErrors[`availability_${day}`]}</p>}
                   </div>
                 ))}
               </div>
@@ -370,6 +405,7 @@ const ProfessionalRegistration = () => {
                 <option value="5-10">5-10 años</option>
                 <option value="mas-10">Más de 10 años</option>
               </select>
+              {fieldErrors.experience && <p className="text-xs text-red-500 mt-1">{fieldErrors.experience}</p>}
             </div>
 
             <div>
@@ -413,9 +449,10 @@ const ProfessionalRegistration = () => {
                 ))}
               </div>
               
-              {formData.skills.length === 0 && (
+              {formData.skills.length === 0 && !fieldErrors.skills && ( // Mostrar ayuda solo si no hay error de campo para skills
                 <p className="help-text text-xs text-neutral mt-1">Añade al menos una habilidad. Presiona Enter o "Añadir".</p>
               )}
+              {fieldErrors.skills && <p className="text-xs text-red-500 mt-1">{fieldErrors.skills}</p>}
             </div>
           </div>
         );

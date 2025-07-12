@@ -65,14 +65,11 @@ api.interceptors.response.use(
 
 // 🔐 AUTH
 export const authService = {
-  // Enviar token de Firebase para sincronizar o crear usuario en el backend
-  syncUser: (userData) => api.post('/auth/sync', userData), // Se ejecuta al loguearse/registrarse con Firebase
-
   // Obtener perfil del usuario autenticado (desde nuestra BD)
   getProfile: () => api.get('/auth/profile'),
   
   // Actualizar perfil del usuario autenticado (en nuestra BD)
-  updateProfile: (profileData) => api.put('/auth/profile', profileData) // <--- AÑADIDO updateProfile
+  updateProfile: (profileData) => api.put('/auth/profile', profileData)
 }
 
 // 👤 PROFESIONAL
@@ -89,13 +86,24 @@ export const professionalService = {
 
 // 🛠️ SERVICIOS
 export const serviceService = {
-  create: (serviceData) => api.post('/services', serviceData),
-  getUserServices: () => api.get('/services/user'),
-  acceptService: (serviceId) => api.patch(`/services/${serviceId}/accept`),
-  updateStatus: (serviceId, status) =>
-    api.patch(`/services/${serviceId}/status`, { status }),
-  rateService: (serviceId, rating, review) =>
-    api.post(`/services/${serviceId}/rate`, { rating, review })
+  create: (serviceData) => api.post('/services', serviceData), // Crear una solicitud de servicio (cliente)
+  // TODO: Considerar si 'createOffer' para un profesional que publica su servicio es diferente
+  
+  listPublic: (params = {}) => api.get('/services', { params }), // Listar servicios públicos (aprobados)
+  
+  getById: (serviceId) => api.get(`/services/${serviceId}`), // Obtener un servicio por ID (protegido)
+
+  getUserServices: () => api.get('/services/user'), // Servicios relacionados al usuario logueado
+  
+  // Acciones de Profesional sobre un servicio
+  acceptService: (serviceId) => api.patch(`/services/${serviceId}/accept`), 
+  updateStatus: (serviceId, status) => api.patch(`/services/${serviceId}/status`, { status }),
+  
+  // Calificaciones
+  rateService: (serviceId, rating, review) => api.post(`/services/${serviceId}/rate`, { rating, review })
+  
+  // TODO: Podríamos necesitar un endpoint para que un profesional actualice SU servicio ofertado (no una solicitud de cliente)
+  // updateOfferedService: (serviceId, serviceData) => api.put(`/services/offer/${serviceId}`, serviceData),
 }
 
 // Exporta la instancia en caso de necesitarla directamente
@@ -104,6 +112,21 @@ export default api
 export const usersAPI = authService // ← nuevo alias
 export const professionalsAPI = professionalService
 export const servicesAPI = serviceService
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

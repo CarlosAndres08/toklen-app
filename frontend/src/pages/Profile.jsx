@@ -5,8 +5,8 @@
 
 
 import React, { useState, useEffect } from 'react'
-import { useAuth } from '../hooks/useAuth'
-import { usersAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext' // Corregido
+import { usersAPI, serviceService } from '../services/api' // Importar serviceService
 
 import { 
   User, 
@@ -21,84 +21,135 @@ import {
   Calendar,
   Shield
 } from 'lucide-react'
+import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom'; // Asegurar que Link esté importado
+import Spinner from '../components/common/Spinner'; // Importar Spinner
 
 const Profile = () => {
-  const { user } = useAuth()
-  const [profile, setProfile] = useState(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  
+  const { user, setUserProfile, userProfile } = useAuth(); // userProfile del AuthContext para el tipo de usuario
+  const [profileDetails, setProfileDetails] = useState(null); // Para los detalles que vienen de /api/auth/profile
+  const [isEditing, setIsEditing] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true); // Renombrado para claridad
+  const [userServices, setUserServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(''); // Error general para la página
+  const [servicesError, setServicesError] = useState('');
+
   const [editData, setEditData] = useState({
     displayName: '',
-    email: '',
-    phone: '',
-    address: '',
-    bio: ''
-  })
+    phoneNumber: '',
+    // bio: '', // Si se decide añadir
+    // address: '', // Si se decide añadir
+  });
 
   useEffect(() => {
-    loadProfile()
-  }, [])
-
-  const loadProfile = async () => {
-    try {
-      setLoading(true)
-      const response = await usersAPI.getProfile()
-      setProfile(response.data)
+    // Usar userProfile del context como base, y luego cargar más detalles si es necesario
+    if (userProfile) {
+      setProfileDetails(userProfile);
       setEditData({
-        displayName: response.data.displayName || '',
-        email: response.data.email || '',
-        phone: response.data.phone || '',
-        address: response.data.address || '',
-        bio: response.data.bio || ''
-      })
-    } catch (error) {
-      console.error('Error cargando perfil:', error)
-      setError('Error al cargar el perfil')
-    } finally {
-      setLoading(false)
+        displayName: userProfile.displayName || '',
+        phoneNumber: userProfile.phoneNumber || '',
+        // bio: userProfile.bio || '',
+        // address: userProfile.address || '',
+      });
+      setLoadingProfile(false); // Asumimos que userProfile ya está cargado
+      loadUserServices(); // Cargar servicios del usuario
+    } else {
+      // Si userProfile no está en el contexto aún (ej. carga inicial), se podría llamar a loadProfile
+      // pero AuthContext ya llama a getProfile. Esperar a que AuthContext lo cargue.
+      setLoadingProfile(true); // Esperando que AuthContext cargue el perfil
     }
-  }
+  }, [userProfile]); // Depender de userProfile del context
+
+  // Esta función podría ser redundante si AuthContext ya carga el perfil completo
+  // y lo pone en userProfile. Se mantiene por si se quiere recargar explícitamente.
+  const loadProfile = async () => { 
+    try {
+      setLoadingProfile(true);
+      const response = await usersAPI.getProfile();
+      const fetchedUser = response.data.user;
+      setProfileDetails(fetchedUser);
+      setUserProfile(fetchedUser); // Actualizar también el contexto
+      setEditData({
+        displayName: fetchedUser?.displayName || '',
+        phoneNumber: fetchedUser?.phoneNumber || '',
+      });
+    } catch (err) {
+      console.error('Error cargando perfil:', err);
+      setError('Error al cargar el perfil');
+      toast.error('Error al cargar el perfil');
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
+  const loadUserServices = async () => {
+    try {
+      setLoadingServices(true);
+      setServicesError('');
+      const response = await serviceService.getUserServices(); // serviceService debe ser importado
+      setUserServices(response.data.services || []);
+    } catch (err) {
+      console.error('Error cargando servicios del usuario:', err);
+      setServicesError('No se pudieron cargar tus servicios.');
+      toast.error('No se pudieron cargar tus servicios.');
+    } finally {
+      setLoadingServices(false);
+    }
+  };
 
   const handleEditToggle = () => {
     if (isEditing) {
       // Cancelar edición - restaurar datos originales
       setEditData({
-        displayName: profile.displayName || '',
-        email: profile.email || '',
-        phone: profile.phone || '',
-        address: profile.address || '',
-        bio: profile.bio || ''
-      })
+        displayName: profile?.displayName || '',
+        // email: profile?.email || '', // No editable
+        phoneNumber: profile?.phoneNumber || '',
+        // address: profile?.address || '',
+        // bio: profile?.bio || ''
+      });
     }
-    setIsEditing(!isEditing)
+    setIsEditing(!isEditing);
     setError('')
   }
 
   const handleSave = async () => {
     try {
-      setSaving(true)
-      setError('')
+      setSaving(true);
+      setError('');
       
-      // Validaciones básicas
-      if (!editData.displayName.trim()) {
-        setError('El nombre es requerido')
-        return
+      if (!editData.displayName?.trim()) {
+        setError('El nombre es requerido.');
+        toast.error('El nombre es requerido.');
+        setSaving(false);
+        return;
       }
       
-      if (!editData.email.trim()) {
-        setError('El email es requerido')
-        return
-      }
+      const dataToSave = {
+        displayName: editData.displayName,
+        phoneNumber: editData.phoneNumber,
+        // Si se añaden bio y address a la tabla users y al DTO del backend:
+        // bio: editData.bio,
+        // address: editData.address,
+      };
 
-      const response = await usersAPI.updateProfile(editData)
-      setProfile(response.data)
-      setIsEditing(false)
+      const response = await usersAPI.updateProfile(dataToSave);
       
-    } catch (error) {
-      console.error('Error actualizando perfil:', error)
-      setError('Error al actualizar el perfil')
+      // response.data.user contiene el perfil actualizado del backend
+      setProfile(response.data.user); 
+      // Actualizar también el userProfile en AuthContext para consistencia global
+      setUserProfile(response.data.user); 
+      
+      setIsEditing(false);
+      toast.success('Perfil actualizado con éxito');
+      
+    } catch (err) {
+      console.error('Error actualizando perfil:', err);
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Error al actualizar el perfil.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSaving(false)
     }
@@ -111,15 +162,12 @@ const Profile = () => {
     }))
   }
 
-  if (loading) {
+  if (loadingProfile) { // Cambiado a loadingProfile
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando perfil...</p>
-        </div>
+        <Spinner size="lg" text="Cargando perfil..." />
       </div>
-    )
+    );
   }
 
   return (
@@ -226,9 +274,9 @@ const Profile = () => {
                     <input
                       id="email"
                       type="email"
-                      value={editData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
+                      value={profile?.email || ''} // Tomar siempre del perfil, no de editData
+                      readOnly // Hacerlo de solo lectura
+                      className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-neutral/10 placeholder-neutral/60 cursor-not-allowed"
                     />
                   ) : (
                     <div className="flex items-center space-x-2 text-secondary py-2">
@@ -240,22 +288,22 @@ const Profile = () => {
 
                 {/* Campo Teléfono */}
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-neutral mb-1">
+                  <label htmlFor="phoneNumber" className="block text-sm font-medium text-neutral mb-1">
                     Teléfono
                   </label>
                   {isEditing ? (
                     <input
-                      id="phone"
+                      id="phoneNumber"
                       type="tel"
-                      value={editData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      value={editData.phoneNumber} // Usar phoneNumber de editData
+                      onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                       className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
                       placeholder="Ej: +51 987654321"
                     />
                   ) : (
                     <div className="flex items-center space-x-2 text-secondary py-2">
                       <Phone className="h-5 w-5 text-neutral/70" />
-                      <span>{profile?.phone || 'No especificado'}</span>
+                      <span>{profile?.phoneNumber || 'No especificado'}</span> {/* Mostrar phoneNumber del perfil */}
                     </div>
                   )}
                 </div>
@@ -324,6 +372,53 @@ const Profile = () => {
               )}
             </div>
           </div>
+
+          {/* Sección de Servicios del Usuario */}
+          <div className="lg:col-span-3 mt-8"> {/* Ocupa todo el ancho en layout grande */}
+            <div className="card bg-base-100 shadow-xl p-6 md:p-8 rounded-xl">
+              <h2 className="text-xl font-semibold text-secondary mb-6">
+                {userProfile?.user_type === 'professional' ? 'Mis Servicios Ofrecidos' : 'Mis Solicitudes de Servicio'}
+              </h2>
+              {loadingServices && <Spinner text="Cargando servicios..." />}
+              {servicesError && <p className="text-red-500">{servicesError}</p>}
+              {!loadingServices && !servicesError && userServices.length === 0 && (
+                <p className="text-neutral">
+                  {userProfile?.user_type === 'professional' ? 'Aún no has publicado ningún servicio.' : 'No has realizado ninguna solicitud de servicio.'}
+                </p>
+              )}
+              {!loadingServices && !servicesError && userServices.length > 0 && (
+                <div className="space-y-4">
+                  {userServices.map(service => (
+                    <div key={service.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                      <Link to={`/service/${service.id}`} className="block">
+                        <div className="flex justify-between items-start">
+                          <h3 className="font-semibold text-primary hover:underline">{service.title}</h3>
+                          <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                            service.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            service.status === 'pending' || service.status === 'pending_approval' ? 'bg-yellow-100 text-yellow-800' :
+                            service.status === 'approved' || service.status === 'accepted' || service.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                            service.status === 'cancelled' || service.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {service.status}
+                          </span>
+                        </div>
+                        <p className="text-sm text-neutral mt-1 truncate">{service.description}</p>
+                        <p className="text-xs text-gray-500 mt-2">
+                          {userProfile?.user_type === 'professional' ? 
+                           (service.client_name ? `Cliente: ${service.client_name}` : 'Esperando cliente') :
+                           (service.professional_name ? `Profesional: ${service.professional_name}`: 'Esperando profesional')
+                          }
+                        </p>
+                        <p className="text-xs text-gray-500">Creado: {new Date(service.created_at).toLocaleDateString()}</p>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
 
           {/* Columna Estadísticas y Actividad */}
           <div className="space-y-8">

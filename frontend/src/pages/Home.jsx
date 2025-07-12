@@ -8,12 +8,13 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 const sampleCategories = [
-  { name: 'Plomería', icon: '/icons/plomeria.png', path: '/search/plomeria', bg: '/backgrounds/plomeria.jpg' },
-  { name: 'Electricidad', icon: '/icons/electricidad.png', path: '/search/electricidad', bg: '/backgrounds/electricidad.jpg' },
-  { name: 'Limpieza', icon: '/icons/limpieza.png', path: '/search/limpieza', bg: '/backgrounds/limpieza.jpg' },
-  { name: 'Carpintería', icon: '/icons/carpinteria.png', path: '/search/carpinteria', bg: '/backgrounds/carpinteria.jpg' },
-  { name: 'Pintura', icon: '/icons/pintura.png', path: '/search/pintura', bg: '/backgrounds/pintura.jpg' },
-  { name: 'Jardinería', icon: '/icons/jardineria.png', path: '/search/jardineria', bg: '/backgrounds/jardineria.jpg' },
+  // TODO: Implementar búsqueda por categoría específica y habilitar enlaces
+  // { name: 'Plomería', icon: '/icons/plomeria.png', path: '/search/plomeria', bg: '/backgrounds/plomeria.jpg' },
+  // { name: 'Electricidad', icon: '/icons/electricidad.png', path: '/search/electricidad', bg: '/backgrounds/electricidad.jpg' },
+  // { name: 'Limpieza', icon: '/icons/limpieza.png', path: '/search/limpieza', bg: '/backgrounds/limpieza.jpg' },
+  // { name: 'Carpintería', icon: '/icons/carpinteria.png', path: '/search/carpinteria', bg: '/backgrounds/carpinteria.jpg' },
+  // { name: 'Pintura', icon: '/icons/pintura.png', path: '/search/pintura', bg: '/backgrounds/pintura.jpg' },
+  // { name: 'Jardinería', icon: '/icons/jardineria.png', path: '/search/jardineria', bg: '/backgrounds/jardineria.jpg' },
 ];
 
 const slideImages = [
@@ -90,7 +91,7 @@ const Home = () => {
                 <Link to="/dashboard" className="btn btn-primary text-base sm:text-lg px-10 py-3">
                   Ir al Dashboard
                 </Link>
-                <Link to="/search-professionals" className="btn btn-outline-light text-base sm:text-lg px-10 py-3">
+                <Link to="/browse-services" className="btn btn-outline-light text-base sm:text-lg px-10 py-3"> {/* Cambiado */}
                   Buscar un Servicio
                 </Link>
               </div>
@@ -132,43 +133,46 @@ const Home = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-secondary text-center mb-12 md:mb-16 font-nunito">
             Explora por Categoría
           </h2>
-          <Swiper
-            modules={[Navigation, Pagination]}
-            navigation
-            pagination={{ clickable: true }}
-            spaceBetween={16}
-            breakpoints={{
-              0: { slidesPerView: 2 },
-              640: { slidesPerView: 2 },
-              768: { slidesPerView: 3 },
-              1024: { slidesPerView: 4 },
-            }}
-            className="pb-12"
-          >
-            {sampleCategories.map((category) => (
-              <SwiperSlide key={category.name}>
-                <Link
-                  to={category.path}
-                  className="relative card-compact text-center rounded-xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center aspect-square"
-                  style={{
-                    backgroundImage: `url(${category.bg})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black/40 z-0" />
-                  <div className="relative z-10 text-white flex flex-col items-center justify-center p-6">
-                    <img src={category.icon} alt={category.name} className="w-12 h-12 mb-3 object-contain" />
-                    <h3 className="font-semibold text-sm md:text-base">{category.name}</h3>
-                  </div>
-                </Link>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          {sampleCategories.length > 0 && (
+            <Swiper
+              modules={[Navigation, Pagination]}
+              navigation
+              pagination={{ clickable: true }}
+              spaceBetween={16}
+              breakpoints={{
+                0: { slidesPerView: 2 },
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 3 },
+                1024: { slidesPerView: 4 },
+              }}
+              className="pb-12"
+            >
+              {sampleCategories.map((category) => (
+                <SwiperSlide key={category.name}>
+                  <Link
+                    to={`/browse-services?category=${category.id}`} // Enlace a browse-services con filtro de categoría
+                    className="relative card-compact text-center rounded-xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center aspect-square"
+                    style={{
+                      backgroundImage: `url(${category.bg})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/40 z-0" />
+                    <div className="relative z-10 text-white flex flex-col items-center justify-center p-6">
+                      <img src={category.icon} alt={category.name} className="w-12 h-12 mb-3 object-contain" />
+                      <h3 className="font-semibold text-sm md:text-base">{category.name}</h3>
+                    </div>
+                  </Link>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
 
           <div className="text-center mt-12">
-            <Link to="/categories" className="btn btn-outline-primary text-base">
-              Ver Todas las Categorías
+            {/* TODO: Crear página de todas las categorías y habilitar enlace, o hacer que este botón vaya a /browse-services sin filtro */}
+            <Link to="/browse-services" className="btn btn-outline-primary text-base"> {/* Cambiado */}
+              Ver Todos los Servicios
             </Link>
           </div>
         </div>

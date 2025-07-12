@@ -1,199 +1,179 @@
-const { Pool } = require('pg')
-const Joi = require('joi')
+const { pool } = require('../config/database');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-})
-
-// Esquemas de validación
-const syncUserSchema = Joi.object({
-  displayName: Joi.string().min(2).max(100),
-  email: Joi.string().email().required(),
-  phoneNumber: Joi.string().optional(),
-  profilePicture: Joi.string().uri().optional(),
-  userType: Joi.string().valid('client', 'professional').default('client')
-})
-
-const updateProfileSchema = Joi.object({
-  displayName: Joi.string().min(2).max(100),
-  phoneNumber: Joi.string().optional(),
-  profilePicture: Joi.string().uri().optional()
-})
-
-const syncUser = async (req, res) => {
+// Listar todos los usuarios
+exports.listUsers = async (req, res) => {
   try {
-    // Validar datos de entrada
-    const { error, value } = syncUserSchema.validate(req.body)
-    if (error) {
-      return res.status(400).json({ 
-        error: 'Datos inválidos', 
-        details: error.details 
-      })
-    }
+    // Paginación simple (opcional, pero buena práctica)
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const offset = (page - 1) * limit;
 
-    const { displayName, email, phoneNumber, profilePicture, userType } = value
+    const usersQuery = `
+      SELECT id, firebase_uid, email, display_name, user_type, is_active, created_at, last_login_at 
+      FROM users 
+      ORDER BY created_at DESC
+      LIMIT $1 OFFSET $2
+    `;
+    const totalUsersQuery = 'SELECT COUNT(*) FROM users';
 
-    // Verificar si el usuario ya existe
-    const existingUser = await pool.query(
-      'SELECT * FROM users WHERE firebase_uid = $1',
-      [req.user.uid]
-    )
-
-    let user
-
-    if (existingUser.rows.length > 0) {
-      // Actualizar usuario existente
-      const updateQuery = `
-        UPDATE users 
-        SET display_name = $1, phone_number = $2, profile_picture_url = $3, 
-            updated_at = CURRENT_TIMESTAMP
-        WHERE firebase_uid = $4
-        RETURNING *
-      `
-      const result = await pool.query(updateQuery, [
-        displayName || existingUser.rows[0].display_name,
-        phoneNumber || existingUser.rows[0].phone_number,
-        profilePicture || existingUser.rows[0].profile_picture_url,
-        req.user.uid
-      ])
-      user = result.rows[0]
-    } else {
-      // Crear nuevo usuario
-      const insertQuery = `
-        INSERT INTO users (firebase_uid, email, display_name, phone_number, profile_picture_url, user_type)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING *
-      `
-      const result = await pool.query(insertQuery, [
-        req.user.uid,
-        email,
-        displayName,
-        phoneNumber,
-        profilePicture,
-        userType
-      ])
-      user = result.rows[0]
-    }
+    const usersResult = await pool.query(usersQuery, [limit, offset]);
+    const totalResult = await pool.query(totalUsersQuery);
 
     res.json({
-      message: 'Usuario sincronizado correctamente',
-      user: {
-        id: user.id,
-        email: user.email,
-        displayName: user.display_name,
-        phoneNumber: user.phone_number,
-        profilePicture: user.profile_picture_url,
-        userType: user.user_type,
-        isActive: user.is_active
+      message: 'Usuarios listados correctamente.',
+      data: usersResult.rows,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalResult.rows[0].count / limit),
+        totalUsers: parseInt(totalResult.rows[0].count, 10),
+        limit,
       }
-    })
-
+    });
   } catch (error) {
-    console.error('Error sincronizando usuario:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    console.error('Error listando usuarios (admin):', error);
+    res.status(500).json({ error: 'Error interno del servidor al listar usuarios.' });
   }
-}
+};
 
-const getProfile = async (req, res) => {
+// Listar todos los servicios (con filtros opcionales)
+exports.listServices = async (req, res) => {
   try {
-    const userQuery = `
-      SELECT u.*, p.id as professional_id, p.business_name, p.category, 
-             p.is_verified, p.average_rating, p.is_available
-      FROM users u
-      LEFT JOIN professionals p ON u.id = p.user_id
-      WHERE u.firebase_uid = $1
-    `
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const offset = (page - 1) * limit;
+    const statusFilter = req.query.status; // ej. 'pending', 'approved', 'rejected'
+
+    let servicesQuery = `
+      SELECT s.id, s.title, s.category, s.status, s.created_at, s.estimated_price as budget,
+             prof_user.display_name as professional_name, 
+             prof_user.email as professional_email, 
+             p.id as professional_id,
+             client_user.display_name as client_name
+      FROM services s
+      LEFT JOIN professionals p ON s.professional_id = p.id
+      LEFT JOIN users prof_user ON p.user_id = prof_user.id
+      LEFT JOIN users client_user ON s.client_id = client_user.id
+    `;
+    // El count query también debe reflejar los LEFT JOINs si el WHERE clause depende de ellos,
+    // pero si el WHERE es solo sobre s.status, puede ser más simple.
+    // Por ahora, para ser seguro, reflejamos la estructura, aunque para status en s no es estrictamente necesario.
+    let countQuery = `
+      SELECT COUNT(s.id) 
+      FROM services s
+      LEFT JOIN professionals p ON s.professional_id = p.id
+      LEFT JOIN users prof_user ON p.user_id = prof_user.id
+      LEFT JOIN users client_user ON s.client_id = client_user.id
+    `;
     
-    const result = await pool.query(userQuery, [req.user.uid])
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' })
+    const queryParams = [];
+    const countQueryParams = [];
+
+    if (statusFilter) {
+      servicesQuery += ' WHERE s.status = $1';
+      countQuery += ' WHERE s.status = $1';
+      queryParams.push(statusFilter);
+      countQueryParams.push(statusFilter);
     }
 
-    const user = result.rows[0]
-    
+    servicesQuery += ` ORDER BY s.created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    queryParams.push(limit, offset);
+
+    const servicesResult = await pool.query(servicesQuery, queryParams);
+    const totalResult = await pool.query(countQuery, countQueryParams);
+
     res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        displayName: user.display_name,
-        phoneNumber: user.phone_number,
-        profilePicture: user.profile_picture_url,
-        userType: user.user_type,
-        isActive: user.is_active,
-        professional: user.professional_id ? {
-          id: user.professional_id,
-          businessName: user.business_name,
-          category: user.category,
-          isVerified: user.is_verified,
-          averageRating: user.average_rating,
-          isAvailable: user.is_available
-        } : null
+      message: 'Servicios listados correctamente.',
+      data: servicesResult.rows,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalResult.rows[0].count / limit),
+        totalServices: parseInt(totalResult.rows[0].count, 10),
+        limit,
       }
-    })
-
+    });
   } catch (error) {
-    console.error('Error obteniendo perfil:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    console.error('Error listando servicios (admin):', error);
+    res.status(500).json({ error: 'Error interno del servidor al listar servicios.' });
   }
-}
+};
 
-const updateProfile = async (req, res) => {
+// Aprobar un servicio
+exports.approveService = async (req, res) => {
   try {
-    const { error, value } = updateProfileSchema.validate(req.body)
-    if (error) {
-      return res.status(400).json({ 
-        error: 'Datos inválidos', 
-        details: error.details 
-      })
-    }
+    const { serviceId } = req.params;
+    const updateQuery = "UPDATE services SET status = 'approved', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'pending' RETURNING *";
+    // Asumimos que 'pending' es el estado que requiere aprobación.
+    // Y 'approved' es el nuevo estado. Podríamos necesitar añadir 'approved' a la lista de CHECK de la tabla.
 
-    const { displayName, phoneNumber, profilePicture } = value
-
-    const updateQuery = `
-      UPDATE users 
-      SET display_name = COALESCE($1, display_name),
-          phone_number = COALESCE($2, phone_number),
-          profile_picture_url = COALESCE($3, profile_picture_url),
-          updated_at = CURRENT_TIMESTAMP
-      WHERE firebase_uid = $4
-      RETURNING *
-    `
-
-    const result = await pool.query(updateQuery, [
-      displayName,
-      phoneNumber,
-      profilePicture,
-      req.user.uid
-    ])
+    const result = await pool.query(updateQuery, [serviceId]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' })
+      return res.status(404).json({ 
+        error: 'Servicio no encontrado, no está pendiente de aprobación, o ya fue procesado.', 
+        code: 'SERVICE_NOT_FOUND_OR_NOT_PENDING' 
+      });
     }
-
-    const user = result.rows[0]
-
-    res.json({
-      message: 'Perfil actualizado correctamente',
-      user: {
-        id: user.id,
-        email: user.email,
-        displayName: user.display_name,
-        phoneNumber: user.phone_number,
-        profilePicture: user.profile_picture_url,
-        userType: user.user_type
-      }
-    })
-
+    res.json({ message: 'Servicio aprobado correctamente.', data: result.rows[0] });
   } catch (error) {
-    console.error('Error actualizando perfil:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    console.error('Error aprobando servicio (admin):', error);
+    res.status(500).json({ error: 'Error interno del servidor al aprobar servicio.' });
   }
-}
+};
 
-module.exports = {
-  syncUser,
-  getProfile,
-  updateProfile
-}
+// Rechazar un servicio
+exports.rejectService = async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    // Asumimos que 'rejected' es un estado válido. Podríamos necesitar añadirlo al CHECK constraint.
+    const updateQuery = "UPDATE services SET status = 'rejected', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'pending' RETURNING *";
+    
+    const result = await pool.query(updateQuery, [serviceId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Servicio no encontrado, no está pendiente de aprobación, o ya fue procesado.', 
+        code: 'SERVICE_NOT_FOUND_OR_NOT_PENDING' 
+      });
+    }
+    res.json({ message: 'Servicio rechazado correctamente.', data: result.rows[0] });
+  } catch (error) {
+    console.error('Error rechazando servicio (admin):', error);
+    res.status(500).json({ error: 'Error interno del servidor al rechazar servicio.' });
+  }
+};
+
+// Eliminar un servicio
+exports.deleteService = async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    const deleteQuery = "DELETE FROM services WHERE id = $1 RETURNING id";
+    
+    const result = await pool.query(deleteQuery, [serviceId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Servicio no encontrado.', 
+        code: 'SERVICE_NOT_FOUND' 
+      });
+    }
+    res.status(200).json({ message: 'Servicio eliminado correctamente.', serviceId: result.rows[0].id });
+  } catch (error) {
+    console.error('Error eliminando servicio (admin):', error);
+    // Podría haber un error si, por ejemplo, hay claves foráneas que impiden el borrado (ON DELETE RESTRICT)
+    // Esto dependerá de la configuración de la BD. Por ahora, un error genérico.
+    res.status(500).json({ error: 'Error interno del servidor al eliminar servicio.' });
+  }
+};
+
+// Eliminar/Desactivar un usuario (Opcional MVP)
+// exports.deleteUser = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     // TODO: Implementar lógica para eliminar o desactivar un usuario
+//     // Considerar eliminar también de Firebase Auth o solo desactivar localmente.
+//     res.status(501).json({ message: `Funcionalidad Eliminar Usuario ID: ${userId} (Admin) no implementada.` });
+//   } catch (error) {
+//     console.error('Error eliminando usuario (admin):', error);
+//     res.status(500).json({ error: 'Error interno del servidor al eliminar usuario.' });
+//   }
+// };

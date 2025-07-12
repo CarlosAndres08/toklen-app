@@ -1,8 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  auth, 
-  googleProvider 
-} from '../services/firebase-config'; // Importaciones de Firebase real
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -12,8 +8,13 @@ import {
   updateProfile,
   sendPasswordResetEmail
 } from 'firebase/auth';
+import { auth, googleProvider } from '../services/firebase-config';
+import { syncUserWithBackend } from '../services/userService';
+import { authService } from '../services/api';
+import GlobalSpinner from '../components/common/GlobalSpinner';
+import { toast } from 'react-toastify';
 
-// Helper para normalizar errores de Firebase
+// Mensajes de error
 const getFirebaseAuthErrorMessage = (errorCode) => {
   switch (errorCode) {
     case 'auth/invalid-email':
@@ -35,6 +36,7 @@ const getFirebaseAuthErrorMessage = (errorCode) => {
   }
 };
 
+// Contexto base
 const AuthContext = createContext({
   currentUser: null,
   login: async () => ({ success: false, error: 'Not implemented' }),
@@ -43,11 +45,12 @@ const AuthContext = createContext({
   loginWithGoogle: async () => ({ success: false, error: 'Not implemented' }),
   resetPassword: async () => ({ success: false, error: 'Not implemented' }),
   loading: true,
-  error: null, // Para almacenar mensajes de error de autenticación
-  setError: () => {}, // Para limpiar errores desde componentes
+  error: null,
+  setError: () => {},
   isAuthenticated: false,
 });
 
+// Hook personalizado
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -56,18 +59,31 @@ export const useAuth = () => {
   return context;
 };
 
+// Provider
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Estado para errores
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      if (user) {
+        try {
+          const response = await authService.getProfile();
+          setUserProfile(response.data.user);
+        } catch (err) {
+          console.error("Error fetching user profile after auth state change:", err);
+          setUserProfile(null);
+        }
+      } else {
+        setUserProfile(null);
+      }
       setLoading(false);
-      setError(null); // Limpiar error en cambio de estado
+      setError(null);
     });
-    return unsubscribe; // Limpieza al desmontar
+    return unsubscribe;
   }, []);
 
   const login = async (email, password) => {
@@ -75,7 +91,16 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged se encargará de setCurrentUser
+      if (userCredential.user) {
+        const syncResponse = await syncUserWithBackend();
+        if (syncResponse.success && syncResponse.data.user) {
+          setUserProfile(syncResponse.data.user);
+          toast.success(`¡Bienvenido de nuevo, ${syncResponse.data.user.display_name || 'Usuario'}!`);
+        } else {
+          setUserProfile(null);
+          toast.warn('Login exitoso, pero hubo un problema al sincronizar tu perfil.');
+        }
+      }
       return { success: true, user: userCredential.user };
     } catch (err) {
       const friendlyError = getFirebaseAuthErrorMessage(err.code);
@@ -92,9 +117,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName });
-      // Actualizar currentUser localmente para reflejar displayName inmediatamente
-      // ya que onAuthStateChanged podría no tenerlo al instante.
-      setCurrentUser(prevUser => ({ ...prevUser, ...userCredential.user, displayName }));
+      setCurrentUser(prev => ({ ...prev, ...userCredential.user, displayName }));
+
+      const syncResponse = await syncUserWithBackend();
+      if (syncResponse.success && syncResponse.data.user) {
+        setUserProfile(syncResponse.data.user);
+        toast.success(`¡Registro exitoso, ${syncResponse.data.user.display_name}!`);
+      } else {
+        setUserProfile(null);
+        toast.warn('Registro exitoso, pero hubo un problema al crear tu perfil local.');
+      }
+
       return { success: true, user: { ...userCredential.user, displayName } };
     } catch (err) {
       const friendlyError = getFirebaseAuthErrorMessage(err.code);
@@ -110,30 +143,35 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       await signOut(auth);
-      // onAuthStateChanged se encargará de setCurrentUser(null)
+      setUserProfile(null);
+      toast.info('Has cerrado sesión.');
     } catch (err) {
-      // Generalmente signOut no falla de forma crítica para el usuario
       console.error("Error al cerrar sesión:", err);
-      setError("Error al cerrar sesión."); // Mensaje genérico
+      toast.error("Error al cerrar sesión.");
+      setError("Error al cerrar sesión.");
     } finally {
       setLoading(false);
     }
   };
-  
+
   const loginWithGoogle = async () => {
     setLoading(true);
     setError(null);
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged se encargará de setCurrentUser
+      if (result.user) {
+        const syncResponse = await syncUserWithBackend();
+        if (syncResponse.success && syncResponse.data.user) {
+          setUserProfile(syncResponse.data.user);
+          toast.success(`¡Hola, ${syncResponse.data.user.display_name || 'Usuario'}!`);
+        } else {
+          setUserProfile(null);
+          toast.warn('Inicio con Google exitoso, pero hubo un problema con tu perfil.');
+        }
+      }
       return { success: true, user: result.user };
     } catch (err) {
-      let friendlyError = getFirebaseAuthErrorMessage(err.code);
-      if (err.code === 'auth/popup-closed-by-user') {
-        friendlyError = 'El proceso de inicio de sesión con Google fue cancelado.';
-      } else if (err.code === 'auth/account-exists-with-different-credential') {
-        friendlyError = 'Ya existe una cuenta con este correo, pero con un método de inicio de sesión diferente.';
-      }
+      const friendlyError = getFirebaseAuthErrorMessage(err.code);
       setError(friendlyError);
       return { success: false, error: friendlyError };
     } finally {
@@ -146,6 +184,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       await sendPasswordResetEmail(auth, email);
+      toast.success('Si tu correo está registrado, recibirás un enlace para restablecer tu contraseña.');
       return { success: true };
     } catch (err) {
       const friendlyError = getFirebaseAuthErrorMessage(err.code);
@@ -156,11 +195,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const isAuthenticated = !!currentUser;
-
   const value = {
     currentUser,
-    isAuthenticated,
+    userProfile,
+    isAuthenticated: !!currentUser,
     login,
     register,
     logout,
@@ -168,14 +206,16 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     loading,
     error,
-    setError // Exportar setError para que los componentes puedan limpiarlo si es necesario
+    setError
   };
 
   return (
     <AuthContext.Provider value={value}>
+      {loading && <GlobalSpinner />}
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 export default AuthContext;
+

@@ -297,21 +297,53 @@ const securityLogger = (req, res, next) => {
   next();
 };
 
+const { pool } = require('../config/database'); // Asegúrate de que la importación de pool esté disponible o ajústala
+
 // ===============================
-// 8. MIDDLEWARE DE ROLES
+// 8. MIDDLEWARE DE ROLES Y DATOS DE USUARIO DE BD
 // ===============================
 
-const requireRole = (roles) => {
-  return async (req, res, next) => {
-    try {
-      // Aquí deberías consultar la base de datos para obtener el rol del usuario
-      // const user = await getUserFromDB(req.user.uid);
-      // const userRole = user.role;
+// Middleware para obtener el usuario de la BD y adjuntarlo a req.dbUser
+const fetchUserFromDbAndAttach = async (req, res, next) => {
+  if (!req.user || !req.user.uid) {
+    // Esto no debería suceder si verifyFirebaseToken se ejecutó correctamente
+    return res.status(401).json({
+      error: 'Usuario no autenticado (sin UID de Firebase)',
+      code: 'AUTH_NO_FIREBASE_UID'
+    });
+  }
+
+  try {
+    const result = await pool.query('SELECT id, firebase_uid, email, display_name, user_type, is_active FROM users WHERE firebase_uid = $1', [req.user.uid]);
+    if (result.rows.length === 0) {
+      // Usuario autenticado por Firebase pero no encontrado en nuestra BD (esto podría pasar si syncUser falla o es un nuevo usuario)
+      // Podríamos permitir que continúe y que syncUser lo cree, o denegar acceso si se espera que ya exista.
+      // Por ahora, para rutas protegidas que requieren un rol, es mejor denegar si no está en la BD.
+      return res.status(403).json({ 
+        error: 'Usuario no encontrado en la base de datos local.', 
+        code: 'USER_NOT_IN_DB' 
+      });
+    }
+    req.dbUser = result.rows[0]; // Adjuntar usuario de la BD
+    next();
+  } catch (error) {
+    console.error('Error fetching user from DB:', error);
+    return res.status(500).json({ error: 'Error interno al obtener datos del usuario', code: 'DB_USER_FETCH_ERROR' });
+  }
+};
+
+const requireRole = (allowedRoles) => {
+  return (req, res, next) => { // No necesita ser async si fetchUserFromDbAndAttach ya lo hizo
+    if (!req.dbUser || !req.dbUser.user_type) {
+      return res.status(403).json({
+        error: 'Información de rol no disponible. Acceso denegado.',
+        code: 'ROLE_INFO_MISSING'
+      });
+    }
+
+    const userRole = req.dbUser.user_type;
       
-      // Por ahora, placeholder
-      const userRole = req.user.role || 'user';
-      
-      if (!roles.includes(userRole)) {
+    if (!allowedRoles.includes(userRole)) {
         return res.status(403).json({
           error: 'Permisos insuficientes',
           code: 'INSUFFICIENT_PERMISSIONS'
@@ -356,6 +388,7 @@ module.exports = {
   // Seguridad
   sanitizeQuery,
   securityLogger,
+  fetchUserFromDbAndAttach, // Exportar el nuevo middleware
   requireRole,
   
   // Configuración completa de seguridad

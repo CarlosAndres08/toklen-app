@@ -6,6 +6,7 @@ import { formatPrice, formatDateTime, getCategoryLabel, getStatusLabel } from '.
 import { SERVICE_STATUSES, STATUS_COLORS } from '../utils/constants'
 import GoogleMap from '../components/maps/GoogleMap'
 import LoadingSpinner from '../components/common/LoadingSpinner'
+import { toast } from 'react-toastify'; // Importar toast
 
 const ServiceDetails = () => {
   const { id } = useParams()
@@ -24,11 +25,29 @@ const ServiceDetails = () => {
   }, [id])
 
   const loadServiceDetails = async () => {
+    setLoading(true); // Asegurarse de poner loading a true al inicio
+    setError('');
     try {
-      const response = await servicesAPI.getById(id)
-      setService(response.data)
+      const response = await servicesAPI.getById(id);
+      if (response.data && response.data.service) {
+        const serviceData = response.data.service;
+        // Reconstruir el objeto location para el mapa
+        if (serviceData.latitude && serviceData.longitude) {
+          serviceData.location = {
+            lat: parseFloat(serviceData.latitude),
+            lng: parseFloat(serviceData.longitude)
+          };
+        }
+        // El backend ahora devuelve requested_datetime, el frontend puede usarlo directamente
+        // o formatearlo como necesite. formatDateTime ya maneja ISO strings.
+        // El campo preferredDate no se usa directamente si tenemos requested_datetime.
+        setService(serviceData);
+      } else {
+        setError('No se encontraron datos para este servicio.');
+        setService(null);
+      }
     } catch (error) {
-      console.error('Error cargando servicio:', error)
+      console.error('Error cargando servicio:', error);
       setError('Error al cargar los detalles del servicio')
     } finally {
       setLoading(false)
@@ -51,30 +70,40 @@ const ServiceDetails = () => {
 
   // Cancelar servicio
   const cancelService = async () => {
-    setUpdating(true)
+    setUpdating(true);
+    setError('');
     try {
-      await servicesAPI.cancel(id)
-      setShowCancelModal(false)
-      navigate('/dashboard')
+      // Usar updateStatus para cancelar
+      await servicesAPI.updateStatus(id, SERVICE_STATUSES.CANCELLED); 
+      toast.info('Servicio cancelado.');
+      // Actualizar el estado local del servicio
+      setService(prev => ({ ...prev, status: SERVICE_STATUSES.CANCELLED }));
+      setShowCancelModal(false);
+      // No necesariamente navegar, podría quedarse en la página para ver el estado cancelado
+      // navigate('/dashboard'); 
     } catch (error) {
-      console.error('Error cancelando servicio:', error)
-      setError('Error al cancelar el servicio')
+      console.error('Error cancelando servicio:', error);
+      const errorMessage = error.response?.data?.error || 'Error al cancelar el servicio.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
-      setUpdating(false)
+      setUpdating(false);
     }
   }
 
   // Verificar si el usuario puede realizar acciones
   const canUpdateStatus = () => {
-    if (!service || !userProfile) return false
+    if (!service || !userProfile) return false;
     
     // El profesional asignado puede actualizar el estado
-    if (userProfile.userType === 'professional' && service.professionalId === user.uid) {
-      return true
+    // service.professional_id es el UUID de la tabla professionals
+    // userProfile.professional?.id es el UUID de la tabla professionals para el usuario logueado
+    if (userProfile.user_type === 'professional' && userProfile.professional && service.professional_id === userProfile.professional.id) {
+      return true;
     }
     
     // El admin puede actualizar cualquier servicio
-    if (userProfile.userType === 'admin') {
+    if (userProfile.user_type === 'admin') {
       return true
     }
     
@@ -82,13 +111,15 @@ const ServiceDetails = () => {
   }
 
   const canCancelService = () => {
-    if (!service || !userProfile) return false
+    if (!service || !userProfile) return false;
     
     // El cliente puede cancelar si el servicio no está en progreso o completado
-    if (service.clientId === user.uid && !['in_progress', 'completed'].includes(service.status)) {
-      return true
+    // service.client_id es el UUID de nuestra tabla users
+    // userProfile.id es el UUID de nuestra tabla users para el usuario logueado
+    if (userProfile.id === service.client_id && 
+        ![SERVICE_STATUSES.IN_PROGRESS, SERVICE_STATUSES.COMPLETED, SERVICE_STATUSES.CANCELLED].includes(service.status)) {
+      return true;
     }
-    
     return false
   }
 
@@ -202,7 +233,7 @@ const ServiceDetails = () => {
                   <div>
                     <span className="text-sm text-gray-500">Fecha solicitada:</span>
                     <p className="font-medium">
-                      {service.preferredDate ? formatDateTime(service.preferredDate) : 'Flexible'}
+                      {service.requested_datetime ? formatDateTime(service.requested_datetime) : 'Flexible'}
                     </p>
                   </div>
                   <div>
@@ -221,11 +252,13 @@ const ServiceDetails = () => {
                 <div className="space-y-3">
                   <div>
                     <span className="text-sm text-gray-500">Cliente:</span>
-                    <p className="font-medium">{service.clientName || 'Usuario'}</p>
+                    <p className="font-medium">{service.client_name || 'Usuario'}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Teléfono:</span>
-                    <p className="font-medium">{service.contactPhone}</p>
+                    <span className="text-sm text-gray-500">Teléfono (Solicitud):</span>
+                    <p className="font-medium">{service.contact_phone}</p> 
+                    {/* Asumiendo que service.contact_phone es el teléfono de la solicitud */}
+                    {/* Si se quiere el teléfono general del cliente, sería service.client_contact_phone */}
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">Dirección:</span>

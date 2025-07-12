@@ -12,6 +12,7 @@ const { notFoundHandler, errorLogger } = require('./middleware/errorUtils')
 const authRoutes = require('./routes/auth')
 const professionalRoutes = require('./routes/professionals')
 const serviceRoutes = require('./routes/services')
+const adminRoutes = require('./routes/admin'); // Importar rutas de admin
 
 const app = express()
 
@@ -106,6 +107,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authLimiter, authRoutes)
 app.use('/api/professionals', professionalRoutes)
 app.use('/api/services', serviceRoutes)
+app.use('/api/admin', adminRoutes); // Registrar rutas de admin, no necesitan authLimiter aquí si ya lo tienen internamente o se aplica global
 
 // Ruta de salud mejorada
 app.get('/api/health', (req, res) => {
