@@ -4,16 +4,22 @@ import { SERVICE_CATEGORIES, CATEGORY_LABELS } from '../utils/constants';
 import ServiceCard from '../components/common/ServiceCard';
 import Spinner from '../components/common/Spinner';
 import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 const BrowseServicesPage = () => {
+  const location = useLocation(); // Get location object
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  const [filters, setFilters] = useState({
-    category: '',
-    search: '',
-    // TODO: Añadir más filtros si es necesario (precio, ubicación, etc.)
+  const [filters, setFilters] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryFromUrl = params.get('category');
+    return {
+      category: categoryFromUrl || '',
+      search: '',
+      // TODO: Añadir más filtros si es necesario (precio, ubicación, etc.)
+    };
   });
   
   const [pagination, setPagination] = useState({
@@ -191,3 +197,5 @@ const BrowseServicesPage = () => {
 };
 
 export default BrowseServicesPage;
+
+

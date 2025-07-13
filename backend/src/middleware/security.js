@@ -351,13 +351,6 @@ const requireRole = (allowedRoles) => {
       }
       
       next();
-    } catch (error) {
-      console.error('Error verificando rol:', error);
-      res.status(500).json({
-        error: 'Error interno del servidor',
-        code: 'INTERNAL_ERROR'
-      });
-    }
   };
 };
 

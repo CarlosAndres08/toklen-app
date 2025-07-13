@@ -8,13 +8,12 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 const sampleCategories = [
-  // TODO: Implementar búsqueda por categoría específica y habilitar enlaces
-  // { name: 'Plomería', icon: '/icons/plomeria.png', path: '/search/plomeria', bg: '/backgrounds/plomeria.jpg' },
-  // { name: 'Electricidad', icon: '/icons/electricidad.png', path: '/search/electricidad', bg: '/backgrounds/electricidad.jpg' },
-  // { name: 'Limpieza', icon: '/icons/limpieza.png', path: '/search/limpieza', bg: '/backgrounds/limpieza.jpg' },
-  // { name: 'Carpintería', icon: '/icons/carpinteria.png', path: '/search/carpinteria', bg: '/backgrounds/carpinteria.jpg' },
-  // { name: 'Pintura', icon: '/icons/pintura.png', path: '/search/pintura', bg: '/backgrounds/pintura.jpg' },
-  // { name: 'Jardinería', icon: '/icons/jardineria.png', path: '/search/jardineria', bg: '/backgrounds/jardineria.jpg' },
+  { name: 'Plomería', id: 'plomeria', icon: '/icons/plomeria.png', bg: '/backgrounds/plomeria.jpg' },
+  { name: 'Electricidad', id: 'electricidad', icon: '/icons/electricidad.png', bg: '/backgrounds/electricidad.jpg' },
+  { name: 'Limpieza', id: 'limpieza', icon: '/icons/limpieza.png', bg: '/backgrounds/limpieza.jpg' },
+  { name: 'Carpintería', id: 'carpinteria', icon: '/icons/carpinteria.png', bg: '/backgrounds/carpinteria.jpg' },
+  { name: 'Pintura', id: 'pintura', icon: '/icons/pintura.png', bg: '/backgrounds/pintura.jpg' },
+  { name: 'Jardinería', id: 'jardineria', icon: '/icons/jardineria.png', bg: '/backgrounds/jardineria.jpg' },
 ];
 
 const slideImages = [
@@ -207,7 +206,5 @@ const Home = () => {
 };
 
 export default Home;
-
-
 
 
