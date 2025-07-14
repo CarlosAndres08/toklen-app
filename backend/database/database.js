@@ -65,4 +65,3 @@ process.on('SIGTERM', async () => {
 })
 
 module.exports = { pool, connectDB, closeDB }
-
