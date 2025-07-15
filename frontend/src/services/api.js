@@ -1,132 +1,184 @@
 import axios from 'axios'
+import { API_BASE_URL, API_TIMEOUT, DEFAULT_HEADERS, DEV_CONFIG } from '../config/api.js'
 
-// Base de la API (desde tu .env)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
-
-// Instancia de Axios
-const api = axios.create({
+// Crear instancia de axios
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: API_TIMEOUT,
+  headers: DEFAULT_HEADERS,
 })
 
-import { auth } from './firebase-config'; // Importar auth de Firebase
-
-// Interceptor de solicitud: agrega token de Firebase a cada request
-api.interceptors.request.use(
-  async (config) => { // Convertido a async para poder usar await con getIdToken
-    if (auth.currentUser) {
-      try {
-        const token = await auth.currentUser.getIdToken(true); // true fuerza la actualización si está expirado
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      } catch (error) {
-        console.error("Error obteniendo token de Firebase:", error);
-        // Opcional: Podrías manejar el error aquí, por ejemplo,
-        // si no se puede obtener el token, cancelar la solicitud o redirigir.
-        // Por ahora, solo lo logueamos y la solicitud continuará sin token si falla.
-      }
+// Interceptor para requests
+apiClient.interceptors.request.use(
+  (config) => {
+    // Agregar token de autenticación si existe
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
     }
-    // Eliminar la dependencia de localStorage para el token de autenticación
-    // ya que Firebase maneja su propia persistencia de sesión.
-    // localStorage.removeItem('authToken'); // Esta línea ya no es necesaria aquí.
-    return config;
+
+    // Log en desarrollo
+    if (DEV_CONFIG.enableLogs) {
+      console.log('🚀 API Request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        data: config.data
+      })
+    }
+
+    return config
   },
-  (error) => Promise.reject(error)
-);
-
-// Interceptor de respuesta: manejo de errores 401
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => { // Convertido a async si necesitamos hacer logout de Firebase
-    if (error.response?.status === 401 && window.location.pathname !== '/login') {
-      console.warn('Error 401: Token inválido o expirado. Redirigiendo a login.');
-      // No es necesario limpiar 'authToken' de localStorage si ya no lo usamos para el token principal.
-      // Firebase maneja su propia sesión. Si el backend rechaza el token de Firebase,
-      // el usuario podría necesitar re-autenticarse o el token refrescarse.
-      // Considerar desloguear al usuario de Firebase si el backend consistentemente da 401.
-      // await auth.signOut(); // Opcional: forzar deslogueo de Firebase
-      
-      // Redirigir a login. Evitar bucles si ya está en /login.
-      if (window.location.pathname !== '/login') {
-         window.location.href = '/login?sessionExpired=true'; // Añadir un query param es opcional
-      }
-    }
-    return Promise.reject(error);
+  (error) => {
+    console.error('❌ Request Error:', error)
+    return Promise.reject(error)
   }
-);
+)
 
-// ==========================
-// SERVICIOS DE LA API
-// ==========================
+// Interceptor para responses
+apiClient.interceptors.response.use(
+  (response) => {
+    // Log en desarrollo
+    if (DEV_CONFIG.enableLogs) {
+      console.log('✅ API Response:', {
+        status: response.status,
+        url: response.config.url,
+        data: response.data
+      })
+    }
 
-// 🔐 AUTH
-export const authService = {
-  // Obtener perfil del usuario autenticado (desde nuestra BD)
-  getProfile: () => api.get('/auth/profile'),
-  
-  // Actualizar perfil del usuario autenticado (en nuestra BD)
-  updateProfile: (profileData) => api.put('/auth/profile', profileData)
+    return response
+  },
+  (error) => {
+    // Log de errores
+    console.error('❌ API Error:', {
+      status: error.response?.status,
+      message: error.response?.data?.error || error.message,
+      url: error.config?.url
+    })
+
+    // Manejar errores específicos
+    if (error.response?.status === 401) {
+      // Token expirado o inválido
+      localStorage.removeItem('authToken')
+      window.location.href = '/login'
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+// Servicios de API
+export const apiService = {
+  // Health checks
+  async ping() {
+    const response = await apiClient.get('/ping')
+    return response.data
+  },
+
+  async healthCheck() {
+    const response = await apiClient.get('/health')
+    return response.data
+  },
+
+  async getStatus() {
+    const response = await apiClient.get('/status')
+    return response.data
+  },
+
+  // Autenticación
+  async login(credentials) {
+    const response = await apiClient.post('/auth/login', credentials)
+    return response.data
+  },
+
+  async register(userData) {
+    const response = await apiClient.post('/auth/register', userData)
+    return response.data
+  },
+
+  // Servicios públicos
+  async getServices(filters = {}) {
+    const response = await apiClient.get('/services', { params: filters })
+    return response.data
+  },
+
+  async getCategories() {
+    const response = await apiClient.get('/categories')
+    return response.data
+  },
+
+  // Perfil de usuario (protegido)
+  async getProfile() {
+    const response = await apiClient.get('/protected/profile')
+    return response.data
+  },
+
+  async updateProfile(profileData) {
+    const response = await apiClient.put('/protected/profile', profileData)
+    return response.data
+  },
+
+  // Solicitudes de servicio (protegido)
+  async createServiceRequest(requestData) {
+    const response = await apiClient.post('/protected/service-requests', requestData)
+    return response.data
+  },
+
+  async getServiceRequests() {
+    const response = await apiClient.get('/protected/service-requests')
+    return response.data
+  },
+
+  // Administración (admin)
+  async getAdminStats() {
+    const response = await apiClient.get('/admin/stats')
+    return response.data
+  },
+
+  // Profesionales
+  async getProfessionalRequests() {
+    const response = await apiClient.get('/professional/requests')
+    return response.data
+  },
 }
 
-// 👤 PROFESIONAL
-export const professionalService = {
-  register: (professionalData) => api.post('/professionals/register', professionalData),
-  search: (params) => api.get('/professionals/search', { params }), // <--- AÑADIDO search
-  getNearby: (params) => api.get('/professionals/nearby', { params }),
-  getProfile: () => api.get('/professionals/profile'), // Perfil del profesional logueado
-  // Considerar si se necesita un getPublicProfileById para ver perfiles de otros
-  // getPublicProfileById: (id) => api.get(`/professionals/${id}`), 
-  updateAvailability: (isAvailable) =>
-    api.patch('/professionals/availability', { isAvailable })
+// Utilidades
+export const apiUtils = {
+  // Verificar si la API está disponible
+  async checkConnection() {
+    try {
+      await apiService.ping()
+      return true
+    } catch (error) {
+      console.error('❌ API no disponible:', error.message)
+      return false
+    }
+  },
+
+  // Obtener información de salud completa
+  async getHealthInfo() {
+    try {
+      const [health, status] = await Promise.all([
+        apiService.healthCheck(),
+        apiService.getStatus()
+      ])
+      return { health, status, connected: true }
+    } catch (error) {
+      return { connected: false, error: error.message }
+    }
+  },
+
+  // Manejar errores de API de forma consistente
+  handleApiError(error, defaultMessage = 'Error en la operación') {
+    if (error.response?.data?.error) {
+      return error.response.data.error
+    }
+    if (error.message) {
+      return error.message
+    }
+    return defaultMessage
+  }
 }
 
-// 🛠️ SERVICIOS
-export const serviceService = {
-  create: (serviceData) => api.post('/services', serviceData), // Crear una solicitud de servicio (cliente)
-  // TODO: Considerar si 'createOffer' para un profesional que publica su servicio es diferente
-  
-  listPublic: (params = {}) => api.get('/services', { params }), // Listar servicios públicos (aprobados)
-  
-  getById: (serviceId) => api.get(`/services/${serviceId}`), // Obtener un servicio por ID (protegido)
-
-  getUserServices: () => api.get('/services/user'), // Servicios relacionados al usuario logueado
-  
-  // Acciones de Profesional sobre un servicio
-  acceptService: (serviceId) => api.patch(`/services/${serviceId}/accept`), 
-  updateStatus: (serviceId, status) => api.patch(`/services/${serviceId}/status`, { status }),
-  
-  // Calificaciones
-  rateService: (serviceId, rating, review) => api.post(`/services/${serviceId}/rate`, { rating, review })
-  
-  // TODO: Podríamos necesitar un endpoint para que un profesional actualice SU servicio ofertado (no una solicitud de cliente)
-  // updateOfferedService: (serviceId, serviceData) => api.put(`/services/offer/${serviceId}`, serviceData),
-}
-
-// Exporta la instancia en caso de necesitarla directamente
-export default api
-// api.js
-export const usersAPI = authService // ← nuevo alias
-export const professionalsAPI = professionalService
-export const servicesAPI = serviceService
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export default apiClient
 

@@ -2,8 +2,13 @@ services:
   - type: web
     name: toklen-backend
     env: node
-    buildCommand: npm install
+    region: oregon
+    plan: starter
+    buildCommand: |
+      npm install
+      npm run build-prod
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,16 +18,27 @@ services:
         fromDatabase:
           name: toklen-postgres
           property: connectionString
-      - key: FIREBASE_ADMIN_PRIVATE_KEY
-        sync: false
-      - key: FIREBASE_ADMIN_CLIENT_EMAIL
-        sync: false
-      - key: FIREBASE_ADMIN_PROJECT_ID
-        sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      # Variables de Firebase (configurar manualmente en Render Dashboard)
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      # Variables de Stripe (configurar manualmente en Render Dashboard)
       - key: STRIPE_SECRET_KEY
         sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      # URL del frontend
       - key: FRONTEND_URL
         value: https://toklen.vercel.app
 
@@ -31,3 +47,6 @@ databases:
     databaseName: toklen_db
     user: toklen_user
     region: oregon
+    plan: starter
+    postgresMajorVersion: 15
+
