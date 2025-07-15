@@ -48,5 +48,10 @@ databases:
     user: toklen_user
     region: oregon
     plan: starter
-    postgresMajorVersion: 15
+
+=======
+    postgresMajorVersion: 17
+
+
+
 
