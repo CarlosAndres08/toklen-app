@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { professionalsAPI } from '../services/api'
+import { apiService } from '../services/api' // Importar apiService
 import { SERVICE_CATEGORIES, CATEGORY_LABELS, LIMA_DISTRICTS } from '../utils/constants'
 import { formatPrice, formatDistance, getCategoryLabel } from '../utils/helpers'
 import useGeolocation from '../hooks/useGeolocation'
@@ -75,7 +75,7 @@ const SearchProfessionals = () => {
         limit: 20
       }
       
-      const response = await professionalsAPI.search(params)
+      const response = await apiService.searchProfessionals(params) // Usar apiService.searchProfessionals()
       setProfessionals(response.data || [])
     } catch (error) {
       console.error('Error cargando profesionales:', error)

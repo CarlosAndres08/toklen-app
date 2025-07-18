@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { servicesAPI } from '../services/api'
+import { apiService } from '../services/api' // CAMBIO AQUI: Importar apiService
 import { useAuth } from '../contexts/AuthContext'
 import { formatPrice, formatDateTime, getCategoryLabel, getStatusLabel } from '../utils/helpers'
 import { SERVICE_STATUSES, STATUS_COLORS } from '../utils/constants'
@@ -28,7 +28,7 @@ const ServiceDetails = () => {
     setLoading(true); // Asegurarse de poner loading a true al inicio
     setError('');
     try {
-      const response = await servicesAPI.getById(id);
+      const response = await apiService.getServiceById(id); // CAMBIO AQUI: Usar apiService.getServiceById()
       if (response.data && response.data.service) {
         const serviceData = response.data.service;
         // Reconstruir el objeto location para el mapa
@@ -58,7 +58,7 @@ const ServiceDetails = () => {
   const updateServiceStatus = async (newStatus) => {
     setUpdating(true)
     try {
-      await servicesAPI.updateStatus(id, newStatus)
+      await apiService.updateServiceStatus(id, newStatus) // CAMBIO AQUI: Usar apiService.updateServiceStatus()
       setService(prev => ({ ...prev, status: newStatus }))
     } catch (error) {
       console.error('Error actualizando estado:', error)
@@ -74,7 +74,7 @@ const ServiceDetails = () => {
     setError('');
     try {
       // Usar updateStatus para cancelar
-      await servicesAPI.updateStatus(id, SERVICE_STATUSES.CANCELLED); 
+      await apiService.updateServiceStatus(id, SERVICE_STATUSES.CANCELLED); // CAMBIO AQUI: Usar apiService.updateServiceStatus()
       toast.info('Servicio cancelado.');
       // Actualizar el estado local del servicio
       setService(prev => ({ ...prev, status: SERVICE_STATUSES.CANCELLED }));
@@ -87,7 +87,7 @@ const ServiceDetails = () => {
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
-      setUpdating(false);
+      setLoading(false);
     }
   }
 

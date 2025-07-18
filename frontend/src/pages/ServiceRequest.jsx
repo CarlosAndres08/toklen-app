@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { servicesAPI } from '../services/api'
+import { apiService } from '../services/api' // CAMBIO AQUI: Importar apiService
 import { SERVICE_CATEGORIES, CATEGORY_LABELS, LIMA_DISTRICTS } from '../utils/constants'
 import { formatPrice } from '../utils/helpers'
 import useGeolocation from '../hooks/useGeolocation'
@@ -131,7 +131,7 @@ const ServiceRequest = () => {
         };
       }
       
-      const response = await servicesAPI.create(dataToSend);
+      const response = await apiService.createServiceRequest(dataToSend); // CAMBIO AQUI: Usar apiService
       
       if (response.data && response.data.service) {
         toast.success('¡Solicitud de servicio enviada con éxito!');

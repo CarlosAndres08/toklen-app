@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { professionalService } from '../services/api'; // <--- AÑADIDA IMPORTACIÓN
+import { apiService } from '../services/api'; // CAMBIO AQUI: Importar apiService
 import "../styles/ProfessionalRegistration.css"; // ✅ Ruta correcta
 
 
@@ -110,7 +110,7 @@ const ProfessionalRegistration = () => {
     if (formData.newSkill.trim() && !formData.skills.includes(formData.newSkill.trim())) {
       setFormData(prev => ({
         ...prev,
-        skills: [...prev.skills, prev.newSkill.trim()],
+        skills: [...prev.skills, formData.newSkill.trim()],
         newSkill: ''
       }));
     }
@@ -203,7 +203,7 @@ const ProfessionalRegistration = () => {
       // const token = await currentUser.getIdToken(); 
       // La cabecera de Authorization la pondrá el interceptor de api.js
 
-      const response = await professionalService.register(professionalData);
+      const response = await apiService.register(professionalData); // CAMBIO AQUI: Usar apiService.register()
 
       // Asumiendo que el backend devuelve un objeto con `data` en la respuesta exitosa de Axios
       if (response.data) { 

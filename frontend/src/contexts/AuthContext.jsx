@@ -10,7 +10,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebase-config';
 import { syncUserWithBackend } from '../services/userService';
-import { authService } from '../services/api';
+import { apiService } from '../services/api'; // CAMBIO AQUI: Importar apiService
 import GlobalSpinner from '../components/common/GlobalSpinner';
 import { toast } from 'react-toastify';
 
@@ -71,7 +71,8 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(user);
       if (user) {
         try {
-          const response = await authService.getProfile();
+          // CAMBIO AQUI: Usar apiService.getProfile()
+          const response = await apiService.getProfile(); 
           setUserProfile(response.data.user);
         } catch (err) {
           console.error("Error fetching user profile after auth state change:", err);
@@ -92,6 +93,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
+        // CAMBIO AQUI: Usar apiService.login() si fuera necesario sincronizar
+        // Actualmente syncUserWithBackend es suficiente para el backend
         const syncResponse = await syncUserWithBackend();
         if (syncResponse.success && syncResponse.data.user) {
           setUserProfile(syncResponse.data.user);
@@ -119,6 +122,8 @@ export const AuthProvider = ({ children }) => {
       await updateProfile(userCredential.user, { displayName });
       setCurrentUser(prev => ({ ...prev, ...userCredential.user, displayName }));
 
+      // CAMBIO AQUI: Usar apiService.register() si fuera necesario sincronizar
+      // Actualmente syncUserWithBackend es suficiente para el backend
       const syncResponse = await syncUserWithBackend();
       if (syncResponse.success && syncResponse.data.user) {
         setUserProfile(syncResponse.data.user);
@@ -160,6 +165,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       if (result.user) {
+        // CAMBIO AQUI: Usar apiService.loginWithGoogle() si fuera necesario sincronizar
+        // Actualmente syncUserWithBackend es suficiente para el backend
         const syncResponse = await syncUserWithBackend();
         if (syncResponse.success && syncResponse.data.user) {
           setUserProfile(syncResponse.data.user);
@@ -218,4 +225,5 @@ export const AuthProvider = ({ children }) => {
 };
 
 export default AuthContext;
+
 

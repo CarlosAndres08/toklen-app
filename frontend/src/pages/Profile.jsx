@@ -1,20 +1,14 @@
-
-
-
-
-
-
 import React, { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext' // Corregido
-import { usersAPI, serviceService } from '../services/api' // Importar serviceService
+import { useAuth } from '../contexts/AuthContext'
+import { apiService } from '../services/api' // CAMBIO AQUI: Importar apiService
 
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Edit2, 
-  Save, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Edit2,
+  Save,
   X,
   Camera,
   Star,
@@ -22,56 +16,47 @@ import {
   Shield
 } from 'lucide-react'
 import { toast } from 'react-toastify';
-import { Link } from 'react-router-dom'; // Asegurar que Link esté importado
-import Spinner from '../components/common/Spinner'; // Importar Spinner
+import { Link } from 'react-router-dom';
+import Spinner from '../components/common/Spinner';
 
 const Profile = () => {
   
-  const { user, setUserProfile, userProfile } = useAuth(); // userProfile del AuthContext para el tipo de usuario
-  const [profileDetails, setProfileDetails] = useState(null); // Para los detalles que vienen de /api/auth/profile
+  const { user, setUserProfile, userProfile } = useAuth();
+  const [profileDetails, setProfileDetails] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [loadingProfile, setLoadingProfile] = useState(true); // Renombrado para claridad
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [userServices, setUserServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(''); // Error general para la página
+  const [error, setError] = useState('');
   const [servicesError, setServicesError] = useState('');
 
   const [editData, setEditData] = useState({
     displayName: '',
     phoneNumber: '',
-    // bio: '', // Si se decide añadir
-    // address: '', // Si se decide añadir
   });
 
   useEffect(() => {
-    // Usar userProfile del context como base, y luego cargar más detalles si es necesario
     if (userProfile) {
       setProfileDetails(userProfile);
       setEditData({
         displayName: userProfile.displayName || '',
         phoneNumber: userProfile.phoneNumber || '',
-        // bio: userProfile.bio || '',
-        // address: userProfile.address || '',
       });
-      setLoadingProfile(false); // Asumimos que userProfile ya está cargado
-      loadUserServices(); // Cargar servicios del usuario
+      setLoadingProfile(false);
+      loadUserServices();
     } else {
-      // Si userProfile no está en el contexto aún (ej. carga inicial), se podría llamar a loadProfile
-      // pero AuthContext ya llama a getProfile. Esperar a que AuthContext lo cargue.
-      setLoadingProfile(true); // Esperando que AuthContext cargue el perfil
+      setLoadingProfile(true);
     }
-  }, [userProfile]); // Depender de userProfile del context
+  }, [userProfile]);
 
-  // Esta función podría ser redundante si AuthContext ya carga el perfil completo
-  // y lo pone en userProfile. Se mantiene por si se quiere recargar explícitamente.
-  const loadProfile = async () => { 
+  const loadProfile = async () => {
     try {
       setLoadingProfile(true);
-      const response = await usersAPI.getProfile();
+      const response = await apiService.getProfile(); // CAMBIO AQUI: Usar apiService.getProfile()
       const fetchedUser = response.data.user;
       setProfileDetails(fetchedUser);
-      setUserProfile(fetchedUser); // Actualizar también el contexto
+      setUserProfile(fetchedUser);
       setEditData({
         displayName: fetchedUser?.displayName || '',
         phoneNumber: fetchedUser?.phoneNumber || '',
@@ -89,7 +74,7 @@ const Profile = () => {
     try {
       setLoadingServices(true);
       setServicesError('');
-      const response = await serviceService.getUserServices(); // serviceService debe ser importado
+      const response = await apiService.getUserServices(); // CAMBIO AQUI: Usar apiService.getUserServices()
       setUserServices(response.data.services || []);
     } catch (err) {
       console.error('Error cargando servicios del usuario:', err);
@@ -102,13 +87,9 @@ const Profile = () => {
 
   const handleEditToggle = () => {
     if (isEditing) {
-      // Cancelar edición - restaurar datos originales
       setEditData({
-        displayName: profile?.displayName || '',
-        // email: profile?.email || '', // No editable
-        phoneNumber: profile?.phoneNumber || '',
-        // address: profile?.address || '',
-        // bio: profile?.bio || ''
+        displayName: profileDetails?.displayName || '',
+        phoneNumber: profileDetails?.phoneNumber || '',
       });
     }
     setIsEditing(!isEditing);
@@ -130,17 +111,12 @@ const Profile = () => {
       const dataToSave = {
         displayName: editData.displayName,
         phoneNumber: editData.phoneNumber,
-        // Si se añaden bio y address a la tabla users y al DTO del backend:
-        // bio: editData.bio,
-        // address: editData.address,
       };
 
-      const response = await usersAPI.updateProfile(dataToSave);
+      const response = await apiService.updateProfile(dataToSave); // CAMBIO AQUI: Usar apiService.updateProfile()
       
-      // response.data.user contiene el perfil actualizado del backend
-      setProfile(response.data.user); 
-      // Actualizar también el userProfile en AuthContext para consistencia global
-      setUserProfile(response.data.user); 
+      setProfileDetails(response.data.user);
+      setUserProfile(response.data.user);
       
       setIsEditing(false);
       toast.success('Perfil actualizado con éxito');
@@ -162,7 +138,7 @@ const Profile = () => {
     }))
   }
 
-  if (loadingProfile) { // Cambiado a loadingProfile
+  if (loadingProfile) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Spinner size="lg" text="Cargando perfil..." />
@@ -196,13 +172,13 @@ const Profile = () => {
                 </div>
                 <div className="text-white mt-3 sm:mt-0 text-center sm:text-left">
                   <h1 className="text-2xl md:text-3xl font-bold">
-                    {profile?.displayName || 'Nombre de Usuario'}
+                    {profileDetails?.displayName || 'Nombre de Usuario'}
                   </h1>
-                  <p className="text-toklen-gray-blue/90 text-sm">{profile?.email}</p>
+                  <p className="text-toklen-gray-blue/90 text-sm">{profileDetails?.email}</p>
                   <div className="flex items-center mt-2 text-xs text-toklen-gray-blue/80 justify-center sm:justify-start">
                     <Shield className="h-3.5 w-3.5 mr-1.5" />
                     <span>
-                      Miembro desde {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }) : 'N/A'}
+                      Miembro desde {profileDetails?.createdAt ? new Date(profileDetails.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }) : 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -260,7 +236,7 @@ const Profile = () => {
                   ) : (
                     <div className="flex items-center space-x-2 text-secondary py-2">
                       <User className="h-5 w-5 text-neutral/70" />
-                      <span>{profile?.displayName || 'No especificado'}</span>
+                      <span>{profileDetails?.displayName || 'No especificado'}</span>
                     </div>
                   )}
                 </div>
@@ -274,14 +250,14 @@ const Profile = () => {
                     <input
                       id="email"
                       type="email"
-                      value={profile?.email || ''} // Tomar siempre del perfil, no de editData
+                      value={profileDetails?.email || ''} // Tomar siempre del perfil, no de editData
                       readOnly // Hacerlo de solo lectura
                       className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-neutral/10 placeholder-neutral/60 cursor-not-allowed"
                     />
                   ) : (
                     <div className="flex items-center space-x-2 text-secondary py-2">
                       <Mail className="h-5 w-5 text-neutral/70" />
-                      <span>{profile?.email}</span>
+                      <span>{profileDetails?.email}</span>
                     </div>
                   )}
                 </div>
@@ -295,7 +271,7 @@ const Profile = () => {
                     <input
                       id="phoneNumber"
                       type="tel"
-                      value={editData.phoneNumber} // Usar phoneNumber de editData
+                      value={editData.phoneNumber}
                       onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                       className="w-full px-4 py-2.5 border border-neutral rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 placeholder-neutral/60"
                       placeholder="Ej: +51 987654321"
@@ -303,7 +279,7 @@ const Profile = () => {
                   ) : (
                     <div className="flex items-center space-x-2 text-secondary py-2">
                       <Phone className="h-5 w-5 text-neutral/70" />
-                      <span>{profile?.phoneNumber || 'No especificado'}</span> {/* Mostrar phoneNumber del perfil */}
+                      <span>{profileDetails?.phoneNumber || 'No especificado'}</span>
                     </div>
                   )}
                 </div>
@@ -325,7 +301,7 @@ const Profile = () => {
                   ) : (
                     <div className="flex items-center space-x-2 text-secondary py-2">
                       <MapPin className="h-5 w-5 text-neutral/70" />
-                      <span>{profile?.address || 'No especificado'}</span>
+                      <span>{profileDetails?.address || 'No especificado'}</span>
                     </div>
                   )}
                 </div>
@@ -346,7 +322,7 @@ const Profile = () => {
                     />
                   ) : (
                     <p className="text-secondary py-2 whitespace-pre-line">
-                      {profile?.bio || 'Aún no has añadido una biografía.'}
+                      {profileDetails?.bio || 'Aún no has añadido una biografía.'}
                     </p>
                   )}
                 </div>
@@ -364,7 +340,7 @@ const Profile = () => {
                   </button>
                   <button
                     onClick={handleEditToggle}
-                    className="btn btn-neutral flex items-center space-x-2" // Usar btn-neutral o btn-outline-secondary
+                    className="btn btn-neutral flex items-center space-x-2"
                   >
                     Cancelar
                   </button>
@@ -374,7 +350,7 @@ const Profile = () => {
           </div>
 
           {/* Sección de Servicios del Usuario */}
-          <div className="lg:col-span-3 mt-8"> {/* Ocupa todo el ancho en layout grande */}
+          <div className="lg:col-span-3 mt-8">
             <div className="card bg-base-100 shadow-xl p-6 md:p-8 rounded-xl">
               <h2 className="text-xl font-semibold text-secondary mb-6">
                 {userProfile?.user_type === 'professional' ? 'Mis Servicios Ofrecidos' : 'Mis Solicitudes de Servicio'}
@@ -430,25 +406,24 @@ const Profile = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-neutral">Servicios solicitados</span>
-                  <span className="font-semibold text-secondary text-lg">{profile?.servicesCount || 0}</span>
+                  <span className="font-semibold text-secondary text-lg">{profileDetails?.servicesCount || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-neutral">Calificación promedio</span>
                   <div className="flex items-center space-x-1">
                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <span className="font-semibold text-secondary text-lg">{profile?.averageRating || 'N/A'}</span>
+                    <span className="font-semibold text-secondary text-lg">{profileDetails?.averageRating || 'N/A'}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-neutral">Último servicio</span>
                   <span className="text-sm text-secondary">
-                    {profile?.lastService ? 
-                      new Date(profile.lastService).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric'}) : 
+                    {profileDetails?.lastService ? 
+                      new Date(profileDetails.lastService).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric'}) : 
                       'Ninguno'
                     }
                   </span>
                 </div>
-                {/* Aquí se podrían añadir más estadísticas relevantes */}
               </div>
             </div>
 
@@ -458,8 +433,8 @@ const Profile = () => {
                 Actividad Reciente
               </h3>
               <div className="space-y-5">
-                {profile?.recentActivity?.length > 0 ? (
-                  profile.recentActivity.slice(0, 3).map((activity, index) => ( // Mostrar solo las 3 más recientes
+                {profileDetails?.recentActivity?.length > 0 ? (
+                  profileDetails.recentActivity.slice(0, 3).map((activity, index) => (
                     <div key={index} className="flex items-start space-x-3">
                       <div className="w-2.5 h-2.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
                       <div>
@@ -475,7 +450,7 @@ const Profile = () => {
                     No hay actividad reciente para mostrar.
                   </p>
                 )}
-                {profile?.recentActivity?.length > 3 && (
+                {profileDetails?.recentActivity?.length > 3 && (
                   <Link to="/activity-log" className="text-sm text-primary hover:underline mt-4 inline-block">Ver toda la actividad</Link>
                 )}
               </div>
