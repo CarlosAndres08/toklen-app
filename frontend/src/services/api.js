@@ -67,77 +67,124 @@ apiClient.interceptors.response.use(
   }
 )
 
-// Servicios de API
+// Servicios de API (exportados individualmente para compatibilidad con código existente)
+export const authService = {
+  login: async (credentials) => {
+    const response = await apiClient.post('/auth/login', credentials)
+    return response.data
+  },
+  register: async (userData) => {
+    const response = await apiClient.post('/auth/register', userData)
+    return response.data
+  },
+  getProfile: async () => {
+    const response = await apiClient.get('/protected/profile')
+    return response.data
+  },
+  updateProfile: async (profileData) => {
+    const response = await apiClient.put('/protected/profile', profileData)
+    return response.data
+  },
+}
+
+export const serviceService = {
+  getServices: async (filters = {}) => {
+    const response = await apiClient.get('/services', { params: filters })
+    return response.data
+  },
+  getCategories: async () => {
+    const response = await apiClient.get('/categories')
+    return response.data
+  },
+  createServiceRequest: async (requestData) => {
+    const response = await apiClient.post('/protected/service-requests', requestData)
+    return response.data
+  },
+  getServiceRequests: async () => {
+    const response = await apiClient.get('/protected/service-requests')
+    return response.data
+  },
+  getServiceById: async (id) => {
+    const response = await apiClient.get(`/protected/service-requests/${id}`)
+    return response.data
+  },
+  updateServiceStatus: async (id, newStatus) => {
+    const response = await apiClient.put(`/protected/service-requests/${id}/status`, { status: newStatus })
+    return response.data
+  },
+  getUserServices: async () => {
+    const response = await apiClient.get('/protected/user-services')
+    return response.data
+  },
+}
+
+export const professionalsAPI = {
+  searchProfessionals: async (params) => {
+    const response = await apiClient.get('/professionals', { params })
+    return response.data
+  },
+  getProfessionalById: async (id) => {
+    const response = await apiClient.get(`/professionals/${id}`)
+    return response.data
+  },
+  registerProfessional: async (professionalData) => {
+    const response = await apiClient.post('/professional/register', professionalData)
+    return response.data
+  },
+}
+
+export const usersAPI = {
+  getProfile: async () => {
+    const response = await apiClient.get('/protected/profile')
+    return response.data
+  },
+  updateProfile: async (profileData) => {
+    const response = await apiClient.put('/protected/profile', profileData)
+    return response.data
+  },
+}
+
+// Exportar apiService unificado (para nuevas implementaciones o si se prefiere)
 export const apiService = {
   // Health checks
-  async ping() {
+  ping: async () => {
     const response = await apiClient.get('/ping')
     return response.data
   },
-
-  async healthCheck() {
+  healthCheck: async () => {
     const response = await apiClient.get('/health')
     return response.data
   },
-
-  async getStatus() {
+  getStatus: async () => {
     const response = await apiClient.get('/status')
     return response.data
   },
 
   // Autenticación
-  async login(credentials) {
-    const response = await apiClient.post('/auth/login', credentials)
-    return response.data
-  },
+  login: authService.login,
+  register: authService.register,
 
-  async register(userData) {
-    const response = await apiClient.post('/auth/register', userData)
-    return response.data
-  },
+  // Servicios públicos y protegidos
+  getServices: serviceService.getServices,
+  getCategories: serviceService.getCategories,
+  createServiceRequest: serviceService.createServiceRequest,
+  getServiceRequests: serviceService.getServiceRequests,
+  getServiceById: serviceService.getServiceById,
+  updateServiceStatus: serviceService.updateServiceStatus,
+  getUserServices: serviceService.getUserServices,
 
-  // Servicios públicos
-  async getServices(filters = {}) {
-    const response = await apiClient.get('/services', { params: filters })
-    return response.data
-  },
-
-  async getCategories() {
-    const response = await apiClient.get('/categories')
-    return response.data
-  },
-
-  // Perfil de usuario (protegido)
-  async getProfile() {
-    const response = await apiClient.get('/protected/profile')
-    return response.data
-  },
-
-  async updateProfile(profileData) {
-    const response = await apiClient.put('/protected/profile', profileData)
-    return response.data
-  },
-
-  // Solicitudes de servicio (protegido)
-  async createServiceRequest(requestData) {
-    const response = await apiClient.post('/protected/service-requests', requestData)
-    return response.data
-  },
-
-  async getServiceRequests() {
-    const response = await apiClient.get('/protected/service-requests')
-    return response.data
-  },
-
-  // Administración (admin)
-  async getAdminStats() {
-    const response = await apiClient.get('/admin/stats')
-    return response.data
-  },
+  // Perfil de usuario
+  getProfile: usersAPI.getProfile,
+  updateProfile: usersAPI.updateProfile,
 
   // Profesionales
-  async getProfessionalRequests() {
-    const response = await apiClient.get('/professional/requests')
+  searchProfessionals: professionalsAPI.searchProfessionals,
+  getProfessionalById: professionalsAPI.getProfessionalById,
+  registerProfessional: professionalsAPI.registerProfessional,
+
+  // Administración (admin)
+  getAdminStats: async () => {
+    const response = await apiClient.get('/admin/stats')
     return response.data
   },
 }
@@ -181,4 +228,5 @@ export const apiUtils = {
 }
 
 export default apiClient
+
 

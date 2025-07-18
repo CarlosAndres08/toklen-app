@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { serviceService } from '../services/api'; // API para servicios
+import { serviceService } from '../services/api'; // API para servicios - YA CORREGIDO EN API.JS
 import { SERVICE_CATEGORIES, CATEGORY_LABELS } from '../utils/constants';
 import ServiceCard from '../components/common/ServiceCard';
 import Spinner from '../components/common/Spinner';
@@ -39,9 +39,10 @@ const BrowseServicesPage = () => {
         category: currentFilters.category || undefined, // Enviar undefined si está vacío
         search: currentFilters.search || undefined,   // Enviar undefined si está vacío
       };
-      const response = await serviceService.listPublic(params);
-      setServices(response.data.data || []);
-      setPagination(response.data.pagination || { currentPage:1, totalPages:1, totalServices:0, limit: 12 });
+      // Usar getServices en lugar de listPublic para compatibilidad con api.js
+      const response = await serviceService.getServices(params);
+      setServices(response.data || []);
+      setPagination(response.pagination || { currentPage:1, totalPages:1, totalServices:0, limit: 12 });
     } catch (err) {
       console.error('Error cargando servicios:', err);
       const errorMessage = err.response?.data?.error || 'No se pudo cargar la lista de servicios.';
@@ -197,5 +198,4 @@ const BrowseServicesPage = () => {
 };
 
 export default BrowseServicesPage;
-
 
