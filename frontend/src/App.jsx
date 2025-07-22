@@ -22,6 +22,12 @@ import BrowseServicesPage from './pages/BrowseServicesPage'; // Importar BrowseS
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const ApiTestComponent = process.env.NODE_ENV === 'development' 
+  ? React.lazy(() => import('./components/dev-components/ApiTestComponent')) 
+  : null;
+
+
+
 
 function App() {
   return (
@@ -48,6 +54,17 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/browse-services" element={<BrowseServicesPage />} /> 
+                {process.env.NODE_ENV === 'development' && ApiTestComponent && (
+                  <Route 
+                    path="/api-test" 
+                    element={
+                      <React.Suspense fallback={<div>Cargando pruebas de API...</div>}>
+                        <ApiTestComponent />
+                      </React.Suspense>
+                    }
+                  />
+                )}
+                
                 
                 {/* Rutas protegidas por Autenticación General */}
                 <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />

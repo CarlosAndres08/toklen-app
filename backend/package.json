@@ -8,8 +8,7 @@
     "dev": "nodemon server.js",
     "test": "jest",
     "test-db": "node test-connection.js",
-    "setup-db": "node scripts/setup-database.js",
-    "reset-db": "node scripts/reset-database.js",
+
     "build-prod": "echo 'Production build completed'",
     "init-prod": "node scripts/init-production.js"
   },
