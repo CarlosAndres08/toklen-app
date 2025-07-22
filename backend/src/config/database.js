@@ -1,23 +1,34 @@
 const { Pool } = require("pg");
 
-// Configuración que funciona tanto local como en Render
 const isProduction = process.env.NODE_ENV === "production";
 
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT, 10), // Aseguramos que sea un número
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  ssl: isProduction
-    ? {
-        rejectUnauthorized: false, // Render exige SSL en producción
-      }
-    : false, // Sin SSL para desarrollo local
-  max: 20, // Máximo de conexiones en el pool
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// Configuración que funciona tanto local como en Render
+let poolConfig;
+
+if (process.env.DATABASE_URL) {
+  // Usar DATABASE_URL (Render y otros servicios cloud)
+  poolConfig = {
+    connectionString: process.env.DATABASE_URL,
+    ssl: isProduction ? { rejectUnauthorized: false } : false,
+  };
+} else {
+  // Usar variables individuales (desarrollo local)
+  poolConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    database: process.env.DB_NAME || 'toklen_db',
+    user: process.env.DB_USER || 'toklen_user',
+    password: process.env.DB_PASSWORD,
+    ssl: false,
+  };
+}
+
+// Configuración común
+poolConfig.max = 20;
+poolConfig.idleTimeoutMillis = 30000;
+poolConfig.connectionTimeoutMillis = 2000;
+
+const pool = new Pool(poolConfig);
 
 const connectDB = async () => {
   try {
@@ -39,12 +50,7 @@ const connectDB = async () => {
 
   } catch (error) {
     console.error('❌ Error conectando a PostgreSQL:', error.message);
-    
-    if (error.code === 'ECONNREFUSED') {
-      console.error('💡 Asegúrate de que PostgreSQL esté ejecutándose localmente');
-      console.error('💡 Verifica que la DATABASE_URL sea correcta en tu archivo .env');
-    }
-    
+    console.error('💡 Verifica que PostgreSQL esté ejecutándose y la configuración sea correcta');
     throw error;
   }
 };
@@ -71,5 +77,6 @@ process.on('SIGTERM', async () => {
 });
 
 module.exports = { pool, connectDB, closeDB };
+
 
 
