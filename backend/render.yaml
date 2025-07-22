@@ -4,9 +4,7 @@ services:
     env: node
     region: oregon
     plan: starter
-    buildCommand: |
-      npm install
-      npm run build-prod
+    buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
@@ -26,6 +24,8 @@ services:
         value: 900000
       - key: RATE_LIMIT_MAX_REQUESTS
         value: 100
+      - key: FRONTEND_URL
+        value: https://toklen.vercel.app
       # Variables de Firebase (configurar manualmente en Render Dashboard)
       - key: FIREBASE_PROJECT_ID
         sync: false
@@ -38,9 +38,6 @@ services:
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
         sync: false
-      # URL del frontend
-      - key: FRONTEND_URL
-        value: https://toklen.vercel.app
 
 databases:
   - name: toklen-postgres
@@ -48,10 +45,5 @@ databases:
     user: toklen_user
     region: oregon
     plan: starter
-
-=======
-    postgresMajorVersion: 17
-
-
-
+    postgresMajorVersion: 16
 
