@@ -41,7 +41,7 @@ services:
 
 databases:
   - name: toklen-postgres
-    databaseName: toklen_db
+    databaseName: toklen_bd
     user: toklen_user
     region: oregon
     plan: starter

@@ -16,7 +16,7 @@ if (process.env.DATABASE_URL) {
   poolConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
-    database: process.env.DB_NAME || 'toklen_db',
+    database: process.env.DB_NAME || 'toklen_bd',
     user: process.env.DB_USER || 'toklen_user',
     password: process.env.DB_PASSWORD,
     ssl: false,
