@@ -46,7 +46,7 @@ const errorLogger = (err, req, res, next) => {
   console.log(`User Agent: ${req.get('User-Agent')}`);
   
   if (req.user) {
-    console.log(`User ID: ${req.user.id}`);
+    console.log(`User ID: ${req.user.uid || req.user.id}`);
   }
   
   if (err.statusCode >= 500) {
@@ -109,10 +109,12 @@ const createError = (message, statusCode = 500) => {
   return new AppError(message, statusCode);
 };
 
-// Middleware para validar IDs de MongoDB
-const validateObjectId = (req, res, next) => {
+// Middleware para validar UUIDs de PostgreSQL
+const validateUUID = (req, res, next) => {
   const { id } = req.params;
-  if (id && !id.match(/^[0-9a-fA-F]{24}$/)) {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  
+  if (id && !uuidRegex.test(id)) {
     return next(new AppError('ID inválido', 400));
   }
   next();
@@ -128,7 +130,7 @@ const handleValidationError = (err, req, res, next) => {
   next(err);
 };
 
-module.exports = {
+export {
   AppError,
   notFoundHandler,
   catchAsync,
@@ -136,6 +138,7 @@ module.exports = {
   errorLogger,
   errorRateLimit,
   createError,
-  validateObjectId,
+  validateUUID,
   handleValidationError
 };
+

@@ -1,9 +1,9 @@
-// src/middleware/security.js
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
-const cors = require('cors');
-const Joi = require('joi');
-const admin = require('firebase-admin');
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import cors from 'cors';
+import Joi from 'joi';
+import admin from 'firebase-admin';
+import { pool } from '../config/database.js';
 
 // ===============================
 // 1. RATE LIMITING
@@ -18,10 +18,7 @@ const authLimiter = rateLimit({
     code: 'RATE_LIMIT_AUTH'
   },
   standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip + ':' + (req.body?.email || 'unknown');
-  }
+  legacyHeaders: false
 });
 
 // Rate limiting para registro de profesionales
@@ -153,6 +150,21 @@ const verifyFirebaseToken = async (req, res, next) => {
 
 // Esquemas de validación
 const validationSchemas = {
+  // Login
+  login: Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required()
+  }),
+
+  // Registro
+  register: Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    userType: Joi.string().valid('client', 'provider').required()
+  }),
+
   // Registro de profesional
   registerProfessional: Joi.object({
     email: Joi.string().email().required().max(255),
@@ -182,6 +194,13 @@ const validationSchemas = {
     duration: Joi.number().valid(30, 45, 60, 90).required(),
     notes: Joi.string().trim().max(500).optional(),
     appointmentType: Joi.string().valid('consultation', 'therapy', 'evaluation').required()
+  }),
+
+  // Crear solicitud de servicio
+  createServiceRequest: Joi.object({
+    serviceId: Joi.string().required(),
+    description: Joi.string().required(),
+    budget: Joi.number().positive()
   }),
 
   // Actualizar perfil
@@ -297,8 +316,6 @@ const securityLogger = (req, res, next) => {
   next();
 };
 
-const { pool } = require('../config/database'); // Asegúrate de que la importación de pool esté disponible o ajústala
-
 // ===============================
 // 8. MIDDLEWARE DE ROLES Y DATOS DE USUARIO DE BD
 // ===============================
@@ -306,7 +323,6 @@ const { pool } = require('../config/database'); // Asegúrate de que la importac
 // Middleware para obtener el usuario de la BD y adjuntarlo a req.dbUser
 const fetchUserFromDbAndAttach = async (req, res, next) => {
   if (!req.user || !req.user.uid) {
-    // Esto no debería suceder si verifyFirebaseToken se ejecutó correctamente
     return res.status(401).json({
       error: 'Usuario no autenticado (sin UID de Firebase)',
       code: 'AUTH_NO_FIREBASE_UID'
@@ -316,15 +332,12 @@ const fetchUserFromDbAndAttach = async (req, res, next) => {
   try {
     const result = await pool.query('SELECT id, firebase_uid, email, display_name, user_type, is_active FROM users WHERE firebase_uid = $1', [req.user.uid]);
     if (result.rows.length === 0) {
-      // Usuario autenticado por Firebase pero no encontrado en nuestra BD (esto podría pasar si syncUser falla o es un nuevo usuario)
-      // Podríamos permitir que continúe y que syncUser lo cree, o denegar acceso si se espera que ya exista.
-      // Por ahora, para rutas protegidas que requieren un rol, es mejor denegar si no está en la BD.
       return res.status(403).json({ 
         error: 'Usuario no encontrado en la base de datos local.', 
         code: 'USER_NOT_IN_DB' 
       });
     }
-    req.dbUser = result.rows[0]; // Adjuntar usuario de la BD
+    req.dbUser = result.rows[0];
     next();
   } catch (error) {
     console.error('Error fetching user from DB:', error);
@@ -333,7 +346,7 @@ const fetchUserFromDbAndAttach = async (req, res, next) => {
 };
 
 const requireRole = (allowedRoles) => {
-  return (req, res, next) => { // No necesita ser async si fetchUserFromDbAndAttach ya lo hizo
+  return (req, res, next) => {
     if (!req.dbUser || !req.dbUser.user_type) {
       return res.status(403).json({
         error: 'Información de rol no disponible. Acceso denegado.',
@@ -355,52 +368,49 @@ const requireRole = (allowedRoles) => {
 };
 
 // ===============================
+// 9. SETUP DE SEGURIDAD GLOBAL
+// ===============================
+
+const setupSecurity = (app) => {
+  app.use(helmet(helmetOptions));       // Protección de cabeceras
+  app.use(cors(corsOptions));           // Permitir CORS
+  app.use('/api/', apiLimiter);         // Limitar peticiones
+  app.use(securityLogger);              // Log de seguridad
+  app.use(sanitizeQuery);               // Limpieza de inputs
+  console.log('🛡️ Middleware de seguridad configurado correctamente');
+};
+
+// ===============================
 // EXPORTAR TODO
 // ===============================
 
-module.exports = {
+export {
   // Rate limiters
   authLimiter,
   registerLimiter,
   apiLimiter,
   strictLimiter,
-  
+
   // CORS
   corsOptions,
-  
+
   // Helmet
   helmetOptions,
-  
+
   // Auth
   verifyFirebaseToken,
-  
+
   // Validación
   validateData,
   validationSchemas,
-  
+
   // Seguridad
   sanitizeQuery,
   securityLogger,
-  fetchUserFromDbAndAttach, // Exportar el nuevo middleware
+  fetchUserFromDbAndAttach,
   requireRole,
-  
+
   // Configuración completa de seguridad
-  setupSecurity: (app) => {
-    // Aplicar helmet
-    app.use(helmet(helmetOptions));
-    
-    // Aplicar CORS
-    app.use(cors(corsOptions));
-    
-    // Rate limiting general
-    app.use('/api/', apiLimiter);
-    
-    // Logging de seguridad
-    app.use(securityLogger);
-    
-    // Sanitización
-    app.use(sanitizeQuery);
-    
-    console.log('🛡️ Middleware de seguridad configurado correctamente');
-  }
+  setupSecurity
 };
+

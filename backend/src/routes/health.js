@@ -1,13 +1,13 @@
-const express = require('express')
-const { pool } = require('../config/database')
+import express from 'express';
+import { pool } from '../config/database.js';
 
-const router = express.Router()
+const router = express.Router();
 
 // Health check endpoint para Render
 router.get('/health', async (req, res) => {
   try {
     // Verificar conexión a la base de datos
-    const dbCheck = await pool.query('SELECT 1 as healthy')
+    const dbCheck = await pool.query('SELECT 1 as healthy');
     
     // Verificar que las tablas principales existen
     const tablesCheck = await pool.query(`
@@ -15,10 +15,10 @@ router.get('/health', async (req, res) => {
       FROM information_schema.tables 
       WHERE table_schema = 'public' 
       AND table_name IN ('users', 'services', 'service_requests')
-    `)
+    `);
     
     const isHealthy = dbCheck.rows[0].healthy === 1 && 
-                     parseInt(tablesCheck.rows[0].table_count) >= 3
+                     parseInt(tablesCheck.rows[0].table_count) >= 3;
     
     if (isHealthy) {
       res.status(200).json({
@@ -27,32 +27,32 @@ router.get('/health', async (req, res) => {
         database: 'connected',
         tables: 'available',
         environment: process.env.NODE_ENV || 'development'
-      })
+      });
     } else {
-      throw new Error('Database or tables not properly configured')
+      throw new Error('Database or tables not properly configured');
     }
     
   } catch (error) {
-    console.error('Health check failed:', error.message)
+    console.error('Health check failed:', error.message);
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       error: error.message,
       environment: process.env.NODE_ENV || 'development'
-    })
+    });
   }
-})
+});
 
 // Status endpoint con más detalles
 router.get('/status', async (req, res) => {
   try {
-    const dbInfo = await pool.query('SELECT version() as version, NOW() as current_time')
+    const dbInfo = await pool.query('SELECT version() as version, NOW() as current_time');
     const tablesInfo = await pool.query(`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public'
       ORDER BY table_name
-    `)
+    `);
     
     res.json({
       status: 'operational',
@@ -68,18 +68,16 @@ router.get('/status', async (req, res) => {
         uptime: process.uptime(),
         memory_usage: process.memoryUsage()
       }
-    })
+    });
     
   } catch (error) {
     res.status(500).json({
       status: 'error',
       timestamp: new Date().toISOString(),
       error: error.message
-    })
+    });
   }
-})
+});
 
-module.exports = router
-
-
+export default router;
 

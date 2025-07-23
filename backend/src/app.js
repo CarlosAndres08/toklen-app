@@ -1,20 +1,23 @@
-const express = require('express')
-const helmet = require('helmet')
-const rateLimit = require('express-rate-limit')
-require('dotenv').config()
+import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
+
+// Cargar variables de entorno
+dotenv.config();
 
 // Importar middlewares personalizados
-const { corsMiddleware, securityHeaders, corsLogger } = require('./middleware/corsMiddleware')
-const errorHandler = require('./middleware/errorHandler')
-const { notFoundHandler, errorLogger } = require('./middleware/errorUtils')
+import { corsMiddleware, securityHeaders, corsLogger } from './middleware/corsMiddleware.js';
+import errorHandler from './middleware/errorHandler.js';
+import { notFoundHandler, errorLogger } from './middleware/errorUtils.js';
 
 // Importar rutas
-const authRoutes = require('./routes/auth')
-const professionalRoutes = require('./routes/professionals')
-const serviceRoutes = require('./routes/services')
-const adminRoutes = require('./routes/admin'); // Importar rutas de admin
+import authRoutes from './routes/auth.js';
+import professionalRoutes from './routes/professionals.js';
+import serviceRoutes from './routes/services.js';
+import adminRoutes from './routes/admin.js';
 
-const app = express()
+const app = express();
 
 // Configuración de seguridad avanzada
 app.use(helmet({
@@ -31,14 +34,14 @@ app.use(helmet({
     includeSubDomains: true,
     preload: true
   }
-}))
+}));
 
 // Headers de seguridad adicionales
-app.use(securityHeaders)
+app.use(securityHeaders);
 
 // CORS con configuración avanzada
-app.use(corsLogger) // Solo en desarrollo
-app.use(corsMiddleware)
+app.use(corsLogger); // Solo en desarrollo
+app.use(corsMiddleware);
 
 // Rate limiting más sofisticado
 const limiter = rateLimit({
@@ -53,9 +56,9 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   skip: (req) => {
     // Omitir rate limiting para rutas de salud
-    return req.path === '/api/health'
+    return req.path === '/api/health';
   }
-})
+});
 
 // Rate limiting especial para autenticación
 const authLimiter = rateLimit({
@@ -67,47 +70,47 @@ const authLimiter = rateLimit({
     retryAfter: 15 * 60
   },
   skipSuccessfulRequests: true // No contar requests exitosos
-})
+});
 
-app.use(limiter)
+app.use(limiter);
 
 // Trust proxy (importante para obtener IP real en producción)
-app.set('trust proxy', 1)
+app.set('trust proxy', 1);
 
 // Body parser con límites de seguridad
 app.use(express.json({ 
   limit: '10mb',
   verify: (req, res, buf) => {
     try {
-      JSON.parse(buf)
+      JSON.parse(buf);
     } catch (e) {
       res.status(400).json({
         success: false,
         message: 'JSON inválido'
-      })
-      return
+      });
+      return;
     }
   }
-}))
+}));
 
 app.use(express.urlencoded({ 
   extended: true,
   limit: '10mb'
-}))
+}));
 
 // Middleware de logging para requests
 app.use((req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`)
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
   }
-  next()
-})
+  next();
+});
 
 // Rutas con rate limiting específico para auth
-app.use('/api/auth', authLimiter, authRoutes)
-app.use('/api/professionals', professionalRoutes)
-app.use('/api/services', serviceRoutes)
-app.use('/api/admin', adminRoutes); // Registrar rutas de admin, no necesitan authLimiter aquí si ya lo tienen internamente o se aplica global
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/professionals', professionalRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Ruta de salud mejorada
 app.get('/api/health', (req, res) => {
@@ -117,42 +120,44 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     version: process.env.npm_package_version || '1.0.0',
     uptime: process.uptime()
-  })
-})
+  });
+});
 
 // Ruta para información de la API
 app.get('/api', (req, res) => {
   res.json({
     success: true,
-    message: 'API de Inventario funcionando correctamente',
+    message: 'API de Toklen funcionando correctamente',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
       professionals: '/api/professionals',
       services: '/api/services',
+      admin: '/api/admin',
       health: '/api/health'
     }
-  })
-})
+  });
+});
 
 // Middleware de logging de errores (antes del error handler)
-app.use(errorLogger)
+app.use(errorLogger);
 
 // Middleware para rutas no encontradas (DEBE ir antes del error handler)
-app.all('*', notFoundHandler)
+app.all('*', notFoundHandler);
 
 // Middleware global de manejo de errores (SIEMPRE al final)
-app.use(errorHandler)
+app.use(errorHandler);
 
 // Manejo graceful de cierre de la aplicación
 process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM recibido. Cerrando servidor HTTP...')
-  process.exit(0)
-})
+  console.log('👋 SIGTERM recibido. Cerrando servidor HTTP...');
+  process.exit(0);
+});
 
 process.on('SIGINT', () => {
-  console.log('👋 SIGINT recibido. Cerrando servidor HTTP...')
-  process.exit(0)
-})
+  console.log('👋 SIGINT recibido. Cerrando servidor HTTP...');
+  process.exit(0);
+});
 
-module.exports = app
+export default app;
+

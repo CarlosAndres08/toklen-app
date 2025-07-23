@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-
 // Clase personalizada para errores de la aplicación
 class AppError extends Error {
   constructor(message, statusCode) {
@@ -12,23 +10,30 @@ class AppError extends Error {
   }
 }
 
-// Manejo de errores de validación de Mongoose
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map(el => el.message);
-  const message = `Datos inválidos: ${errors.join('. ')}`;
-  return new AppError(message, 400);
-};
-
-// Manejo de errores de duplicados de MongoDB
-const handleDuplicateFieldsDB = (err) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  const message = `Campo duplicado: ${value}. Por favor usa otro valor.`;
-  return new AppError(message, 400);
-};
-
-// Manejo de errores de cast de MongoDB
-const handleCastErrorDB = (err) => {
-  const message = `ID inválido: ${err.value}`;
+// Manejo de errores de PostgreSQL
+const handlePostgreSQLError = (err) => {
+  let message = 'Error de base de datos';
+  
+  switch (err.code) {
+    case '23505': // unique_violation
+      message = 'Este registro ya existe. Por favor usa valores únicos.';
+      break;
+    case '23503': // foreign_key_violation
+      message = 'Referencia inválida. El registro relacionado no existe.';
+      break;
+    case '23502': // not_null_violation
+      message = 'Campo requerido faltante.';
+      break;
+    case '22001': // string_data_right_truncation
+      message = 'Datos demasiado largos para el campo.';
+      break;
+    case '42P01': // undefined_table
+      message = 'Tabla no encontrada.';
+      break;
+    default:
+      message = 'Error de base de datos.';
+  }
+  
   return new AppError(message, 400);
 };
 
@@ -87,21 +92,17 @@ const globalErrorHandler = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
 
-    // Manejo específico de errores de MongoDB/Mongoose
-    if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+    // Manejo específico de errores de PostgreSQL
+    if (err.code && typeof err.code === 'string') {
+      error = handlePostgreSQLError(error);
+    }
+    
+    // Manejo de errores JWT
     if (error.name === 'JsonWebTokenError') error = handleJWTError();
     if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
 
     sendErrorProd(error, req, res);
   }
-};
-
-// Middleware para rutas no encontradas
-const notFoundHandler = (req, res, next) => {
-  const err = new AppError(`No se encontró la ruta ${req.originalUrl}`, 404);
-  next(err);
 };
 
 // Captura de errores asíncronos no manejados
@@ -134,7 +135,7 @@ const errorLogger = (err, req, res, next) => {
   console.log(`User Agent: ${req.get('User-Agent')}`);
   
   if (req.user) {
-    console.log(`User ID: ${req.user.id}`);
+    console.log(`User ID: ${req.user.uid || req.user.id}`);
   }
   
   if (err.statusCode >= 500) {
@@ -143,54 +144,6 @@ const errorLogger = (err, req, res, next) => {
   
   next(err);
 };
-
-// Middleware de rate limiting para errores
-const errorRateLimit = () => {
-  const attempts = new Map();
-  
-  return (err, req, res, next) => {
-    if (err.statusCode === 429) {
-      const ip = req.ip;
-      const now = Date.now();
-      const windowMs = 15 * 60 * 1000; // 15 minutos
-      
-      if (!attempts.has(ip)) {
-        attempts.set(ip, []);
-      }
-      
-      const userAttempts = attempts.get(ip);
-      const recentAttempts = userAttempts.filter(time => now - time < windowMs);
-      
-      if (recentAttempts.length >= 5) {
-        return res.status(429).json({
-          success: false,
-          message: 'Demasiados errores. Intenta más tarde.',
-          retryAfter: Math.ceil(windowMs / 1000)
-        });
-      }
-      
-      recentAttempts.push(now);
-      attempts.set(ip, recentAttempts);
-    }
-    
-    next(err);
-  };
-};
-
-// Cleanup de memoria para el rate limiting
-setInterval(() => {
-  const now = Date.now();
-  const windowMs = 15 * 60 * 1000;
-  
-  for (const [ip, attempts] of attempts.entries()) {
-    const recentAttempts = attempts.filter(time => now - time < windowMs);
-    if (recentAttempts.length === 0) {
-      attempts.delete(ip);
-    } else {
-      attempts.set(ip, recentAttempts);
-    }
-  }
-}, 5 * 60 * 1000); // Limpia cada 5 minutos
 
 // Manejo de errores no capturados
 process.on('uncaughtException', (err) => {
@@ -205,5 +158,7 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
-// Exportar SOLO la función middleware principal
-module.exports = globalErrorHandler;
+// Exportar funciones
+export default globalErrorHandler;
+export { AppError, catchAsync, validateSchema, errorLogger };
+

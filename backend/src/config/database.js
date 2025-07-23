@@ -1,31 +1,33 @@
-const { Pool } = require("pg");
+import dotenv from 'dotenv';
+import pkg from 'pg';
 
-const isProduction = process.env.NODE_ENV === "production";
+// Cargar variables de entorno
+dotenv.config();
 
-// Configuración profesional: prioriza variables individuales para mayor seguridad
+const { Pool } = pkg;
+
+const isProduction = process.env.NODE_ENV === 'production';
+
 let poolConfig;
 
 if (isProduction && process.env.DATABASE_URL) {
-  // En producción, usar DATABASE_URL si está disponible (Render, Heroku, etc.)
   poolConfig = {
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: { rejectUnauthorized: false }
   };
   console.log('🔗 Usando DATABASE_URL para conexión en producción');
 } else {
-  // Usar variables individuales (más seguro y flexible)
   poolConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     database: process.env.DB_NAME || 'toklen_bd',
     user: process.env.DB_USER || 'toklen_user',
     password: process.env.DB_PASSWORD,
-    ssl: isProduction ? { rejectUnauthorized: false } : false,
+    ssl: isProduction ? { rejectUnauthorized: false } : false
   };
   console.log(`🔗 Usando variables individuales para conexión a ${poolConfig.database}`);
 }
 
-// Validar que las variables críticas estén definidas
 if (!isProduction || !process.env.DATABASE_URL) {
   if (!process.env.DB_PASSWORD) {
     console.error('❌ ERROR: DB_PASSWORD no está definida en las variables de entorno');
@@ -37,7 +39,6 @@ if (!isProduction || !process.env.DATABASE_URL) {
   }
 }
 
-// Configuración común
 poolConfig.max = 20;
 poolConfig.idleTimeoutMillis = 30000;
 poolConfig.connectionTimeoutMillis = 2000;
@@ -48,8 +49,7 @@ const connectDB = async () => {
   try {
     const client = await pool.connect();
     console.log(`✅ PostgreSQL conectado correctamente (${isProduction ? 'PRODUCCIÓN' : 'DESARROLLO'})`);
-    
-    // Verificar que las tablas existen
+
     const tablesQuery = `
       SELECT table_name 
       FROM information_schema.tables 
@@ -58,18 +58,15 @@ const connectDB = async () => {
     `;
     const result = await client.query(tablesQuery);
     console.log('📊 Tablas disponibles:', result.rows.map(row => row.table_name));
-    
+
     client.release();
     return true;
-
   } catch (error) {
     console.error('❌ Error conectando a PostgreSQL:', error.message);
-    console.error('💡 Verifica que PostgreSQL esté ejecutándose y la configuración sea correcta');
     throw error;
   }
 };
 
-// Función para cerrar la conexión limpiamente
 const closeDB = async () => {
   try {
     await pool.end();
@@ -79,7 +76,6 @@ const closeDB = async () => {
   }
 };
 
-// Manejar cierre de aplicación
 process.on('SIGINT', async () => {
   await closeDB();
   process.exit(0);
@@ -90,5 +86,6 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-module.exports = { pool, connectDB, closeDB };
+// 👇 EXPORTS PARA ESM
+export { pool, connectDB, closeDB };
 

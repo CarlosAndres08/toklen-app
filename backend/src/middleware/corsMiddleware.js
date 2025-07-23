@@ -1,4 +1,4 @@
-const cors = require('cors');
+import cors from 'cors';
 
 // Configuración de CORS para desarrollo y producción
 const corsOptions = {
@@ -118,10 +118,11 @@ const corsLogger = (req, res, next) => {
   next();
 };
 
-module.exports = {
+export {
   corsMiddleware,
   preflightHandler,
   securityHeaders,
   corsLogger,
   corsOptions
 };
+

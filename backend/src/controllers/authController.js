@@ -1,7 +1,90 @@
-const { pool } = require('../config/database');
+import { pool } from '../config/database.js';
 
-// Listar todos los usuarios
-exports.listUsers = async (req, res) => {
+// Sincronizar usuario después del login con Firebase
+export const syncUser = async (req, res) => {
+  try {
+    const { uid, email, displayName } = req.user;
+    
+    // Verificar si el usuario ya existe
+    const existingUser = await pool.query('SELECT * FROM users WHERE firebase_uid = $1', [uid]);
+    
+    if (existingUser.rows.length === 0) {
+      // Crear nuevo usuario
+      const newUser = await pool.query(
+        'INSERT INTO users (firebase_uid, email, display_name, user_type) VALUES ($1, $2, $3, $4) RETURNING *',
+        [uid, email, displayName || email.split('@')[0], 'client']
+      );
+      
+      res.status(201).json({
+        message: 'Usuario sincronizado correctamente',
+        user: newUser.rows[0]
+      });
+    } else {
+      // Actualizar último login
+      await pool.query(
+        'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE firebase_uid = $1',
+        [uid]
+      );
+      
+      res.json({
+        message: 'Usuario ya existe, login actualizado',
+        user: existingUser.rows[0]
+      });
+    }
+  } catch (error) {
+    console.error('Error sincronizando usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// Obtener perfil del usuario autenticado
+export const getProfile = async (req, res) => {
+  try {
+    const { uid } = req.user;
+    
+    const user = await pool.query('SELECT * FROM users WHERE firebase_uid = $1', [uid]);
+    
+    if (user.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    res.json({
+      message: 'Perfil obtenido correctamente',
+      user: user.rows[0]
+    });
+  } catch (error) {
+    console.error('Error obteniendo perfil:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// Actualizar perfil del usuario
+export const updateProfile = async (req, res) => {
+  try {
+    const { uid } = req.user;
+    const { display_name, phone } = req.body;
+    
+    const updatedUser = await pool.query(
+      'UPDATE users SET display_name = $1, phone = $2, updated_at = CURRENT_TIMESTAMP WHERE firebase_uid = $3 RETURNING *',
+      [display_name, phone, uid]
+    );
+    
+    if (updatedUser.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    res.json({
+      message: 'Perfil actualizado correctamente',
+      user: updatedUser.rows[0]
+    });
+  } catch (error) {
+    console.error('Error actualizando perfil:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// Listar todos los usuarios (función de administrador)
+export const listUsers = async (req, res) => {
   try {
     // Paginación simple (opcional, pero buena práctica)
     const page = parseInt(req.query.page, 10) || 1;
@@ -36,7 +119,7 @@ exports.listUsers = async (req, res) => {
 };
 
 // Listar todos los servicios (con filtros opcionales)
-exports.listServices = async (req, res) => {
+export const listServices = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
@@ -54,9 +137,7 @@ exports.listServices = async (req, res) => {
       LEFT JOIN users prof_user ON p.user_id = prof_user.id
       LEFT JOIN users client_user ON s.client_id = client_user.id
     `;
-    // El count query también debe reflejar los LEFT JOINs si el WHERE clause depende de ellos,
-    // pero si el WHERE es solo sobre s.status, puede ser más simple.
-    // Por ahora, para ser seguro, reflejamos la estructura, aunque para status en s no es estrictamente necesario.
+    
     let countQuery = `
       SELECT COUNT(s.id) 
       FROM services s
@@ -98,12 +179,10 @@ exports.listServices = async (req, res) => {
 };
 
 // Aprobar un servicio
-exports.approveService = async (req, res) => {
+export const approveService = async (req, res) => {
   try {
     const { serviceId } = req.params;
     const updateQuery = "UPDATE services SET status = 'approved', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'pending' RETURNING *";
-    // Asumimos que 'pending' es el estado que requiere aprobación.
-    // Y 'approved' es el nuevo estado. Podríamos necesitar añadir 'approved' a la lista de CHECK de la tabla.
 
     const result = await pool.query(updateQuery, [serviceId]);
 
@@ -121,10 +200,9 @@ exports.approveService = async (req, res) => {
 };
 
 // Rechazar un servicio
-exports.rejectService = async (req, res) => {
+export const rejectService = async (req, res) => {
   try {
     const { serviceId } = req.params;
-    // Asumimos que 'rejected' es un estado válido. Podríamos necesitar añadirlo al CHECK constraint.
     const updateQuery = "UPDATE services SET status = 'rejected', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'pending' RETURNING *";
     
     const result = await pool.query(updateQuery, [serviceId]);
@@ -143,7 +221,7 @@ exports.rejectService = async (req, res) => {
 };
 
 // Eliminar un servicio
-exports.deleteService = async (req, res) => {
+export const deleteService = async (req, res) => {
   try {
     const { serviceId } = req.params;
     const deleteQuery = "DELETE FROM services WHERE id = $1 RETURNING id";
@@ -159,21 +237,7 @@ exports.deleteService = async (req, res) => {
     res.status(200).json({ message: 'Servicio eliminado correctamente.', serviceId: result.rows[0].id });
   } catch (error) {
     console.error('Error eliminando servicio (admin):', error);
-    // Podría haber un error si, por ejemplo, hay claves foráneas que impiden el borrado (ON DELETE RESTRICT)
-    // Esto dependerá de la configuración de la BD. Por ahora, un error genérico.
     res.status(500).json({ error: 'Error interno del servidor al eliminar servicio.' });
   }
 };
 
-// Eliminar/Desactivar un usuario (Opcional MVP)
-// exports.deleteUser = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     // TODO: Implementar lógica para eliminar o desactivar un usuario
-//     // Considerar eliminar también de Firebase Auth o solo desactivar localmente.
-//     res.status(501).json({ message: `Funcionalidad Eliminar Usuario ID: ${userId} (Admin) no implementada.` });
-//   } catch (error) {
-//     console.error('Error eliminando usuario (admin):', error);
-//     res.status(500).json({ error: 'Error interno del servidor al eliminar usuario.' });
-//   }
-// };
