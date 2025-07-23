@@ -3,11 +3,11 @@
 echo "🚀 Configurando proyecto Toklen..."
 
 # Crear directorios principales
-mkdir -p toklen/{frontend,backend,database/{migrations,seeds}}
+mkdir -p frontend backend database/{migrations,seeds}
 
 # Configurar Frontend
 echo "📦 Configurando Frontend..."
-cd toklen/frontend
+cd frontend
 npm create vite@latest . -- --template react
 npm install firebase axios socket.io-client @googlemaps/js-api-loader
 
