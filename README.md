@@ -187,4 +187,3 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 **¡Tu plataforma de servicios profesionales está lista para conquistar el mundo! 🌟**
 
-"# toklen-app" 
