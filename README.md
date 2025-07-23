@@ -31,8 +31,12 @@ npm install
 # 3. Configurar PostgreSQL (automático)
 setup-windows.bat
 
-# 4. Configurar variables de entorno
+# 4. Configurar variables de entorno (crear archivo .env)
 copy .env.example .env
+# Editar .env con tus credenciales reales:
+# DB_PASSWORD=Carandre08
+# DB_NAME=toklen_bd
+# DB_USER=toklen_user
 
 # 5. Probar conexión
 npm run test-db

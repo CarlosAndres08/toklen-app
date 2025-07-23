@@ -2,25 +2,39 @@ const { Pool } = require("pg");
 
 const isProduction = process.env.NODE_ENV === "production";
 
-// Configuración que funciona tanto local como en Render
+// Configuración profesional: prioriza variables individuales para mayor seguridad
 let poolConfig;
 
-if (process.env.DATABASE_URL) {
-  // Usar DATABASE_URL (Render y otros servicios cloud)
+if (isProduction && process.env.DATABASE_URL) {
+  // En producción, usar DATABASE_URL si está disponible (Render, Heroku, etc.)
   poolConfig = {
     connectionString: process.env.DATABASE_URL,
-    ssl: isProduction ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false },
   };
+  console.log('🔗 Usando DATABASE_URL para conexión en producción');
 } else {
-  // Usar variables individuales (desarrollo local)
+  // Usar variables individuales (más seguro y flexible)
   poolConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     database: process.env.DB_NAME || 'toklen_bd',
     user: process.env.DB_USER || 'toklen_user',
     password: process.env.DB_PASSWORD,
-    ssl: false,
+    ssl: isProduction ? { rejectUnauthorized: false } : false,
   };
+  console.log(`🔗 Usando variables individuales para conexión a ${poolConfig.database}`);
+}
+
+// Validar que las variables críticas estén definidas
+if (!isProduction || !process.env.DATABASE_URL) {
+  if (!process.env.DB_PASSWORD) {
+    console.error('❌ ERROR: DB_PASSWORD no está definida en las variables de entorno');
+    process.exit(1);
+  }
+  if (!process.env.DB_NAME) {
+    console.error('❌ ERROR: DB_NAME no está definida en las variables de entorno');
+    process.exit(1);
+  }
 }
 
 // Configuración común

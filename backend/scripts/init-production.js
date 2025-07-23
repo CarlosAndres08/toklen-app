@@ -11,7 +11,7 @@ async function initializeProductionDB() {
   const pool = new Pool({
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT, 10),
-    database: process.env.DB_NAME,
+    database: process.env.DB_NAME || 'toklen_bd',
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     ssl: isProduction
@@ -27,7 +27,7 @@ async function initializeProductionDB() {
   try {
     const client = await pool.connect();
     console.log(
-      `✅ PostgreSQL conectado correctamente (${isProduction ? "PRODUCCIÓN" : "DESARROLLO"})`
+      `✅ PostgreSQL conectado correctamente a ${process.env.DB_NAME || 'toklen_bd'} (${isProduction ? "PRODUCCIÓN" : "DESARROLLO"})`
     );
 
     // Leer y ejecutar el script de inicialización
