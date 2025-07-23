@@ -1,11 +1,12 @@
-const Joi = require('joi'); // ✅ Para respaldo en validación
+import Joi from 'joi'; // ✅ Para respaldo en validación
 
 // ✅ Cargar variables desde .env
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-const express = require('express');
-const { connectDB } = require('./src/config/database');
-const {
+import express from 'express';
+import { connectDB } from './src/config/database.js';
+import {
   setupSecurity,
   authLimiter,
   registerLimiter,
@@ -13,10 +14,10 @@ const {
   validateData,
   validationSchemas,
   requireRole
-} = require('./src/middleware/security');
+} from './src/middleware/security.js';
 
 // Importar rutas de health check
-const healthRoutes = require('./src/routes/health');
+import healthRoutes from './src/routes/health.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -291,5 +292,5 @@ connectDB()
     process.exit(1);
   });
 
-module.exports = app;
+export default app;
 
